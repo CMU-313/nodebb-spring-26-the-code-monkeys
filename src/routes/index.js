@@ -24,6 +24,8 @@ const _mounts = {
 	feed: require('./feeds'),
 	'well-known': require('./well-known'),
 	activitypub: require('./activitypub'),
+	folders: require('./folders'),
+
 };
 
 _mounts.main = (app, middleware, controllers) => {
@@ -41,6 +43,9 @@ _mounts.main = (app, middleware, controllers) => {
 
 	setupPageRoute(app, '/email/unsubscribe/:token', [], controllers.accounts.settings.unsubscribe);
 	app.post('/email/unsubscribe/:token', controllers.accounts.settings.unsubscribePost);
+	setupPageRoute(app, '/folders', [middleware.ensureLoggedIn], controllers.folders.get);
+  	setupPageRoute(app, '/folders/bookmarks', [middleware.ensureLoggedIn], controllers.folders.bookmarks.get);
+
 
 	app.post('/compose', middleware.applyCSRF, controllers.composer.post);
 };
@@ -82,6 +87,9 @@ _mounts.categories = (app, name, middleware, controllers) => {
 	setupPageRoute(app, '/recent', [], controllers.recent.get);
 	setupPageRoute(app, '/top', [], controllers.top.get);
 	setupPageRoute(app, '/unread', [middleware.ensureLoggedIn], controllers.unread.get);
+	setupPageRoute(app, '/folders', [middleware.ensureLoggedIn], controllers.folders.get);
+	setupPageRoute(app, '/folders/bookmarks', [middleware.ensureLoggedIn], controllers.folders.bookmarks.get);
+
 };
 
 _mounts.category = (app, name, middleware, controllers) => {
