@@ -100,14 +100,12 @@ foldersController.bookmarks.get = async function (req, res, next) {
 		]);
 
 		const postData = await hydratePosts(pids, req.uid);
-        postData.forEach((p) => {
-            p.postUrl = `${nconf.get('relative_path')}/post/${p.pid}`;
-        
-            const body = p.content || p.rawContent || '';
-            p.postTitle = makeExcerpt(body, 80);
-        
-            p.topicTitle = p.topic && p.topic.title ? p.topic.title : '';
-        });
+		postData.forEach((p) => {
+			p.postUrl = `${nconf.get('relative_path')}/post/${p.pid}`;
+			const body = p.content || p.rawContent || '';
+			p.postTitle = makeExcerpt(body, 80);
+			p.topicTitle = p.topic && p.topic.title ? p.topic.title : '';
+		});
         
 
 		const userData = await user.getUserFields(req.uid, ['uid', 'username', 'userslug', 'picture']);

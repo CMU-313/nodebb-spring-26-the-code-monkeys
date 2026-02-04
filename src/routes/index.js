@@ -44,7 +44,7 @@ _mounts.main = (app, middleware, controllers) => {
 	setupPageRoute(app, '/email/unsubscribe/:token', [], controllers.accounts.settings.unsubscribe);
 	app.post('/email/unsubscribe/:token', controllers.accounts.settings.unsubscribePost);
 	setupPageRoute(app, '/folders', [middleware.ensureLoggedIn], controllers.folders.get);
-  	setupPageRoute(app, '/folders/bookmarks', [middleware.ensureLoggedIn], controllers.folders.bookmarks.get);
+	setupPageRoute(app, '/folders/bookmarks', [middleware.ensureLoggedIn], controllers.folders.bookmarks.get);
 
 
 	app.post('/compose', middleware.applyCSRF, controllers.composer.post);
