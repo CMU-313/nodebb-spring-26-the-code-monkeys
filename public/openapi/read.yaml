@@ -61,6 +61,8 @@ tags:
   - name: search
   - name: tags
     description: Disparate method of categorizing topics
+  - name: folders
+    description: User-created folders for organizing bookmarked topics
   - name: shorthand
     description: Convenience and utility routes for accessing other part of the API
   - name: other
@@ -368,3 +370,7 @@ paths:
     $ref: 'read/ap.yaml'
   /api/outgoing:
     $ref: 'read/outgoing.yaml'
+  /api/folders:
+    $ref: 'read/folders.yaml'
+  /api/folders/bookmarks:
+    $ref: 'read/folders/bookmarks.yaml'

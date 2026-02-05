@@ -27,6 +27,7 @@ const activitypub = require('../src/activitypub');
 const utils = require('../src/utils');
 const api = require('../src/api');
 
+
 describe('API', async () => {
 	let readApi = false;
 	let writeApi = false;

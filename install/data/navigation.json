@@ -70,6 +70,7 @@
 		"route": "/folders",
 		"title": "Folders",
 		"enabled": true,
+		"iconClass": "fa-folder",
 		"textClass": "d-lg-none",
 		"text": "Folders",
 		"groups": ["registered-users"]
