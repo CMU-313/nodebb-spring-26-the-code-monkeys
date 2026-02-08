@@ -8,7 +8,7 @@ const Topics = require('../src/topics');
 const User = require('../src/user');
 const groups = require('../src/groups');
 
-describe('Q&A Features - Person C (Categories + Data Model)', () => {
+describe('Q&A Features (Categories + Data Model)', () => {
 	let adminUid;
 	let qandaCid;
 	let nonQandaCid;
