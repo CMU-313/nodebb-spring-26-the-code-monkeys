@@ -70,8 +70,8 @@ helpers.addLinkTags = function (params) {
 	});
 };
 
-helpers.buildFilters = function (url, filter, query) {
-	return [{
+helpers.buildFilters = function (url, filter, query, options = {}) {
+	const filters = [{
 		name: '[[unread:all-topics]]',
 		url: url + helpers.buildQueryString(query, 'filter', ''),
 		selected: filter === '',
@@ -96,6 +96,24 @@ helpers.buildFilters = function (url, filter, query) {
 		filter: 'unreplied',
 		icon: 'fa-reply',
 	}];
+
+	if (options.includeQandAFilters) {
+		filters.push({
+			name: '[[unread:resolved-topics]]',
+			url: url + helpers.buildQueryString(query, 'filter', 'resolved'),
+			selected: filter === 'resolved',
+			filter: 'resolved',
+			icon: 'fa-check-circle',
+		}, {
+			name: '[[unread:unresolved-topics]]',
+			url: url + helpers.buildQueryString(query, 'filter', 'unresolved'),
+			selected: filter === 'unresolved',
+			filter: 'unresolved',
+			icon: 'fa-question-circle',
+		});
+	}
+
+	return filters;
 };
 
 helpers.buildTerms = function (url, term, query) {
