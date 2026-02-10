@@ -444,4 +444,15 @@ Categories.buildForSelectCategories = function (categories, fields, parentCid) {
 	return categoriesData.map(category => _.pick(category, pickFields));
 };
 
+Categories.isQandACategory = async function (cid) {
+	if (!cid) {
+		return false;
+	}
+	const isQandA = await db.getObjectField(
+		`${utils.isNumber(cid) ? 'category' : 'categoryRemote'}:${cid}`,
+		'isQandA'
+	);
+	return parseInt(isQandA, 10) === 1;
+};
+
 require('../promisify')(Categories);

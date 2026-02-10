@@ -103,6 +103,13 @@
 					</div>
 				</div>
 
+				<div class="mb-3">
+					<div class="form-check form-switch">
+						<input type="checkbox" class="form-check-input" id="cid-isQandA" data-name="isQandA" {{{ if category.isQandA }}}checked{{{ end }}} />
+						<label for="cid-isQandA" class="form-check-label">Is Q &amp; A</label>
+					</div>
+				</div>
+
 				{{{ if postQueueEnabled }}}
 				<div class="mb-3">
 					<div class="form-check form-switch">

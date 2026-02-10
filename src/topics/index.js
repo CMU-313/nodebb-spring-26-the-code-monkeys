@@ -99,7 +99,7 @@ Topics.getTopicsByTids = async function (tids, options) {
 			Topics.getTeasers(topics, options),
 			user.getUsersFields(uids, ['uid', 'username', 'fullname', 'userslug', 'reputation', 'postcount', 'picture', 'signature', 'banned', 'status']),
 			loadShowfullnameSettings(),
-			categories.getCategoriesFields(cids, ['cid', 'name', 'slug', 'icon', 'backgroundImage', 'imageClass', 'bgColor', 'color', 'disabled']),
+			categories.getCategoriesFields(cids, ['cid', 'name', 'slug', 'icon', 'backgroundImage', 'imageClass', 'bgColor', 'color', 'disabled', 'isQandA']),
 			loadGuestHandles(),
 			Topics.thumbs.load(topics),
 		]);
@@ -148,6 +148,7 @@ Topics.getTopicsByTids = async function (tids, options) {
 				Math.max(1, topic.postcount + 2 - bookmarks[i]) :
 				Math.min(topic.postcount, bookmarks[i] + 1));
 			topic.unreplied = !topic.teaser;
+			topic.isQandA = topic.category && parseInt(topic.category.isQandA, 10) === 1;
 
 			topic.icons = [];
 		}
@@ -211,6 +212,7 @@ Topics.getTopicWithPosts = async function (topicData, set, uid, start, stop, rev
 	topicData.isIgnoring = followData[0].ignoring;
 	topicData.bookmark = bookmark;
 	topicData.postSharing = postSharing;
+	topicData.isQandA = category && parseInt(category.isQandA, 10) === 1;
 	topicData.deleter = deleter;
 	if (deleter) {
 		topicData.deletedTimestampISO = utils.toISOString(topicData.deletedTimestamp);

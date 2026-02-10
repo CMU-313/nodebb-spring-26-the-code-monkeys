@@ -25,6 +25,7 @@
 	"ext-link": "External Link",
 	"subcategories-per-page": "Subcategories per page",
 	"is-section": "Treat this category as a section",
+	"is-qanda": "Enable Q&A features (Resolved/Unresolved status, Accepted Answer)",
 	"post-queue": "Post queue",
 	"tag-whitelist": "Tag Whitelist",
 	"upload-image": "Upload Image",
