@@ -29,6 +29,9 @@ TopicObject:
               type: string
             disabled:
               type: number
+            isQandA:
+              type: number
+              description: Whether this category has Q&A features enabled
         user:
           type: object
           properties:
@@ -175,6 +178,9 @@ TopicObject:
           type: number
         unreplied:
           type: boolean
+        isQandA:
+          type: boolean
+          description: Whether this topic belongs to a Q&A category
         icons:
           type: array
           items:
@@ -227,6 +233,12 @@ TopicObjectSlim:
           type: number
         followercount:
           type: number
+        resolved:
+          type: number
+          description: Whether this Q&A topic has been marked as resolved (0 = unresolved, 1 = resolved)
+        acceptedPid:
+          type: number
+          description: The post id of the accepted answer, or 0 if no answer is accepted
         scheduled:
           type: number
         deleted:

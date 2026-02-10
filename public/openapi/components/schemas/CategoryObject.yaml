@@ -66,6 +66,9 @@ CategoryObject:
           description: The `background-position` of the category background image, if one is set
         isSection:
           type: number
+        isQandA:
+          type: number
+          description: Whether this category has Q&A features enabled (Resolved/Unresolved status, Accepted Answer)
         minTags:
           type: number
           description: Minimum tags per topic in this category

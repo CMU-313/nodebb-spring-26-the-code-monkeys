@@ -47,6 +47,7 @@ module.exports = function (Categories) {
 			imageClass: 'cover',
 			isSection: 0,
 			subCategoriesPerPage: 10,
+			isQandA: data.isQandA ? 1 : 0,
 		};
 
 		if (data.backgroundImage) {
