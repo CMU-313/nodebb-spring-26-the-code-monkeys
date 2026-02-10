@@ -33,7 +33,8 @@ module.exports = function (Posts) {
 			tid, content, 
 			sourceContent, 
 			timestamp, 
-			anonymous: data.anonymous || false};
+			anonymous: data.anonymous || false,
+		};
 
 		if (data.toPid) {
 			postData.toPid = data.toPid;

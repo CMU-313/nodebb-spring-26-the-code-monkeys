@@ -116,9 +116,6 @@ if (document.readyState === 'loading') {
 			pagination.init();
 			search.init();
 			overrides.overrideTimeago();
-			// require(['forum/custom/anonymous-posting'], function (anonymousPosting) {
-    	// 	anonymousPosting.init();
-			// });
 			hooks.fire('action:app.load');
 			messages.show();
 			appLoaded = true;
@@ -384,7 +381,7 @@ if (document.readyState === 'loading') {
 // Anonymous posting feature
 console.log('[Anonymous] Script loaded in app.js');
 
-$(document).ready(function() {
+$(document).ready(function () {
 	$(window).on('action:composer.loaded', function (ev, data) {
 		console.log('[Anonymous] Composer loaded event fired!', data);
 		
