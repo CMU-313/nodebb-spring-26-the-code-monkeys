@@ -1750,7 +1750,9 @@ describe('User', () => {
 				unreadCounts: {
 					'': 4,
 					new: 4,
+					resolved: 0,
 					unreplied: 4,
+					unresolved: 0,
 					watched: 0,
 				},
 				unreadNewTopicCount: 4,
