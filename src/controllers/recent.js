@@ -87,7 +87,9 @@ recentController.getData = async function (req, url, sort, selectedTerm = 'allti
 		}
 	}
 
-	data.filters = helpers.buildFilters(baseUrl, filter, query);
+	data.filters = helpers.buildFilters(baseUrl, filter, query, {
+		includeQandAFilters: true,
+	});
 	data.selectedFilter = data.filters.find(filter => filter && filter.selected);
 	data.terms = helpers.buildTerms(baseUrl, term, query);
 	data.selectedTerm = data.terms.find(term => term && term.selected);
