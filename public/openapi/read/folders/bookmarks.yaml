@@ -1,0 +1,110 @@
+get:
+  summary: Get bookmarked posts in a specific folder
+  description: Retrieves all bookmarked posts for the current user in the specified folder
+  tags:
+    - folders
+  responses:
+    '200':
+      description: Successful response containing bookmarked posts
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+            properties:
+              title:
+                type: string
+                example: "Bookmarked"
+              user:
+                type: object
+                additionalProperties: true
+                properties:
+                  uid:
+                    type: integer
+                  username:
+                    type: string
+                  userslug:
+                    type: string
+                  picture:
+                    type: string
+                    nullable: true
+                  displayname:
+                    type: string
+                  icon:bgColor:
+                    type: string
+                  icon:text:
+                    type: string
+                  isLocal:
+                    type: boolean
+              folders:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    slug:
+                      type: string
+                      example: "bookmarks"
+                    name:
+                      type: string
+                      example: "Bookmarked"
+                    href:
+                      type: string
+                      example: "/folders/bookmarks"
+                    icon:
+                      type: string
+                      example: "fa-bookmark"
+                    active:
+                      type: boolean
+                      example: true
+              activeFolder:
+                type: string
+                example: "bookmarks"
+              posts:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              pagination:
+                type: object
+                properties:
+                  currentPage:
+                    type: integer
+                    example: 1
+                  pageCount:
+                    type: integer
+                    example: 1
+                  prev:
+                    nullable: true
+                  next:
+                    nullable: true
+              hasItems:
+                type: boolean
+                example: false
+              loggedIn:
+                type: boolean
+                example: true
+              loggedInUser:
+                type: object
+                additionalProperties: true
+              relative_path:
+                type: string
+              template:
+                type: object
+                additionalProperties: true
+              url:
+                type: string
+                example: "/folders/bookmarks"
+              bodyClass:
+                type: string
+              _header:
+                type: object
+                additionalProperties: true
+              widgets:
+                type: object
+                additionalProperties: true
+    '401':
+      description: Unauthorized - User must be logged in
+    '403':
+      description: Forbidden - User does not have permission
+    '404':
+      description: Folder not found

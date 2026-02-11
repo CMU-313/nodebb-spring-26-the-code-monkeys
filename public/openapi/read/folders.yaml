@@ -1,0 +1,63 @@
+get:
+  summary: Get user folders
+  description: Retrieves all folders for the current user, including bookmarked topics
+  tags:
+    - folders
+  responses:
+    '200':
+      description: Successful response containing user folders
+      content:
+        application/json:
+          schema:
+            type: object
+            additionalProperties: true
+            properties:
+              title:
+                type: string
+                example: "Folders"
+              folders:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    slug:
+                      type: string
+                      example: "bookmarks"
+                    name:
+                      type: string
+                      example: "Bookmarked"
+                    description:
+                      type: string
+                      example: "All of your bookmarked posts"
+                    href:
+                      type: string
+                      example: "/folders/bookmarks"
+                    icon:
+                      type: string
+                      example: "fa-bookmark"
+              loggedIn:
+                type: boolean
+                example: true
+              loggedInUser:
+                type: object
+                additionalProperties: true
+              relative_path:
+                type: string
+              template:
+                type: object
+                additionalProperties: true
+              url:
+                type: string
+                example: "/folders"
+              bodyClass:
+                type: string
+              _header:
+                type: object
+                additionalProperties: true
+              widgets:
+                type: object
+                additionalProperties: true
+    '401':
+      description: Unauthorized - User must be logged in
+    '403':
+      description: Forbidden - User does not have permission

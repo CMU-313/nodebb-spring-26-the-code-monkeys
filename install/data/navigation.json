@@ -66,6 +66,16 @@
 		"text": "[[global:header.groups]]"
 	},
 	{
+		"id": "folders",
+		"route": "/folders",
+		"title": "Folders",
+		"enabled": true,
+		"iconClass": "fa-folder",
+		"textClass": "d-lg-none",
+		"text": "Folders",
+		"groups": ["registered-users"]
+	},
+	{
 		"route": "/admin",
 		"title": "[[global:header.admin]]",
 		"enabled": true,
