@@ -94,17 +94,6 @@ body:not(.page-user) {
 	top: 0;
 	padding: 0.25rem 0;
 }
-.qa-status-resolved {
-	color: var(--bs-success-text-emphasis);
-	background-color: var(--bs-success-bg-subtle);
-	border-color: var(--bs-success-border-subtle) !important;
-}
-
-.qa-status-unresolved {
-	color: var(--bs-warning-text-emphasis);
-	background-color: var(--bs-warning-bg-subtle);
-	border-color: var(--bs-warning-border-subtle) !important;
-}
 // quartz doesn't need body-bg for tool background
 .skin-quartz .sticky-tools {
 	background-color: initial;

@@ -1,7 +1,6 @@
 'use strict';
 
 const topics = require('../../topics');
-const categories = require('../../categories');
 const privileges = require('../../privileges');
 const plugins = require('../../plugins');
 
@@ -22,7 +21,6 @@ module.exports = function (SocketTopics) {
 		if (!userPrivileges['topics:read'] || !userPrivileges.view_thread_tools) {
 			throw new Error('[[error:no-privileges]]');
 		}
-		topicData.isQandA = await categories.isQandACategory(topicData.cid);
 		topicData.privileges = userPrivileges;
 		const result = await plugins.hooks.fire('filter:topic.thread_tools', {
 			topic: topicData,

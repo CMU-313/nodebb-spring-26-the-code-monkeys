@@ -92,14 +92,6 @@ module.exports = function (Topics) {
 		return await toggleLock(tid, uid, false);
 	};
 
-	topicTools.resolve = async function (tid, uid) {
-		return await toggleResolve(tid, uid, true);
-	};
-
-	topicTools.unresolve = async function (tid, uid) {
-		return await toggleResolve(tid, uid, false);
-	};
-
 	async function toggleLock(tid, uid, lock) {
 		const topicData = await Topics.getTopicFields(tid, ['tid', 'uid', 'cid']);
 		if (!topicData || !topicData.cid) {
@@ -115,31 +107,6 @@ module.exports = function (Topics) {
 		topicData.locked = lock;
 
 		plugins.hooks.fire('action:topic.lock', { topic: _.clone(topicData), uid: uid });
-		return topicData;
-	}
-
-	async function toggleResolve(tid, uid, resolve) {
-		const topicData = await Topics.getTopicFields(tid, ['tid', 'uid', 'cid', 'resolved']);
-		if (!topicData || !topicData.cid) {
-			throw new Error('[[error:no-topic]]');
-		}
-
-		const [isQandA, canResolve] = await Promise.all([
-			categories.isQandACategory(topicData.cid),
-			privileges.topics.isAdminOrMod(tid, uid),
-		]);
-		if (!isQandA) {
-			throw new Error('[[error:invalid-data]]');
-		}
-		if (!canResolve) {
-			throw new Error('[[error:no-privileges]]');
-		}
-
-		await Topics.setTopicField(tid, 'resolved', resolve ? 1 : 0);
-		topicData.isResolved = resolve; // deprecate in v2.0
-		topicData.resolved = resolve ? 1 : 0;
-
-		plugins.hooks.fire('action:topic.resolve', { topic: _.clone(topicData), uid: uid });
 		return topicData;
 	}
 

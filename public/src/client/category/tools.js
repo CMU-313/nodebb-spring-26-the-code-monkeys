@@ -136,8 +136,6 @@ define('forum/category/tools', [
 		socket.on('event:topic_unlocked', setLockedState);
 		socket.on('event:topic_pinned', setPinnedState);
 		socket.on('event:topic_unpinned', setPinnedState);
-		socket.on('event:topic_resolved', setResolvedState);
-		socket.on('event:topic_unresolved', setResolvedState);
 		socket.on('event:topic_moved', onTopicMoved);
 	};
 
@@ -184,8 +182,6 @@ define('forum/category/tools', [
 		socket.removeListener('event:topic_unlocked', setLockedState);
 		socket.removeListener('event:topic_pinned', setPinnedState);
 		socket.removeListener('event:topic_unpinned', setPinnedState);
-		socket.removeListener('event:topic_resolved', setResolvedState);
-		socket.removeListener('event:topic_unresolved', setResolvedState);
 		socket.removeListener('event:topic_moved', onTopicMoved);
 	};
 
@@ -286,14 +282,6 @@ define('forum/category/tools', [
 		const topic = getTopicEl(data.tid);
 		topic.toggleClass('locked', data.isLocked);
 		topic.find('[component="topic/locked"]').toggleClass('hidden', !data.isLocked);
-	}
-
-	function setResolvedState(data) {
-		const topic = getTopicEl(data.tid);
-		const isResolved = !!(data.isResolved || parseInt(data.resolved, 10) === 1);
-		topic.toggleClass('resolved', isResolved);
-		topic.find('[component="topic/resolved"]').toggleClass('hidden', !isResolved);
-		topic.find('[component="topic/unresolved"]').toggleClass('hidden', isResolved);
 	}
 
 	async function onTopicMoved(data) {

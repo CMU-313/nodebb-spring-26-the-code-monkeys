@@ -13,7 +13,6 @@ describe('Q&A Features (Categories + Data Model)', () => {
 	let qandaCid;
 	let nonQandaCid;
 	let topicData;
-	let nonQandaTopicData;
 
 	before(async () => {
 		adminUid = await User.create({ username: 'qanda_admin' });
@@ -89,42 +88,6 @@ describe('Q&A Features (Categories + Data Model)', () => {
 			assert.strictEqual(data.resolved, 0);
 			assert.strictEqual(data.acceptedPid, 0);
 		});
-
-		it('should create a topic in a non-Q&A category for guard checks', async () => {
-			const result = await Topics.post({
-				uid: adminUid,
-				cid: nonQandaCid,
-				title: 'Test non-Q&A topic',
-				content: 'This is a normal topic',
-			});
-			nonQandaTopicData = result.topicData;
-			assert.strictEqual(nonQandaTopicData.resolved, 0);
-		});
-	});
-
-	describe('Resolve/unresolve topic tools', () => {
-		it('should resolve a topic in a Q&A category', async () => {
-			const resolvedData = await Topics.tools.resolve(topicData.tid, adminUid);
-			assert.strictEqual(resolvedData.resolved, 1);
-
-			const persisted = await Topics.getTopicField(topicData.tid, 'resolved');
-			assert.strictEqual(persisted, 1);
-		});
-
-		it('should unresolve a topic in a Q&A category', async () => {
-			const unresolvedData = await Topics.tools.unresolve(topicData.tid, adminUid);
-			assert.strictEqual(unresolvedData.resolved, 0);
-
-			const persisted = await Topics.getTopicField(topicData.tid, 'resolved');
-			assert.strictEqual(persisted, 0);
-		});
-
-		it('should reject resolving a topic in a non-Q&A category', async () => {
-			await assert.rejects(
-				Topics.tools.resolve(nonQandaTopicData.tid, adminUid),
-				/\[\[error:invalid-data\]\]/
-			);
-		});
 	});
 
 	describe('Questions categories upgrade script', () => {
@@ -142,36 +105,6 @@ describe('Q&A Features (Categories + Data Model)', () => {
 			const topics = await Topics.getTopics([topicData.tid], { uid: adminUid });
 			assert.strictEqual(topics.length > 0, true);
 			assert.strictEqual(topics[0].isQandA, true);
-		});
-	});
-
-	describe('resolved/unresolved filters', () => {
-		it('should only include Q&A resolved topics in resolved filter', async () => {
-			await Topics.tools.resolve(topicData.tid, adminUid);
-			const data = await Topics.getSortedTopics({
-				uid: adminUid,
-				start: 0,
-				stop: 20,
-				filter: 'resolved',
-				sort: 'recent',
-				term: 'alltime',
-			});
-			assert.strictEqual(data.topics.some(t => t.tid === topicData.tid), true);
-			assert.strictEqual(data.topics.every(t => t.isQandA && t.resolved === 1), true);
-		});
-
-		it('should only include Q&A unresolved topics in unresolved filter', async () => {
-			await Topics.tools.unresolve(topicData.tid, adminUid);
-			const data = await Topics.getSortedTopics({
-				uid: adminUid,
-				start: 0,
-				stop: 20,
-				filter: 'unresolved',
-				sort: 'recent',
-				term: 'alltime',
-			});
-			assert.strictEqual(data.topics.some(t => t.tid === topicData.tid), true);
-			assert.strictEqual(data.topics.every(t => t.isQandA && t.resolved === 0), true);
 		});
 	});
 });

@@ -254,7 +254,7 @@ module.exports = function (Topics) {
 		}
 
 		tids = await privileges.topics.filterTids('topics:read', tids, uid);
-		let topicData = await Topics.getTopicsFields(tids, ['uid', 'tid', 'cid', 'tags', 'resolved']);
+		let topicData = await Topics.getTopicsFields(tids, ['uid', 'tid', 'cid', 'tags']);
 		const topicCids = _.uniq(topicData.map(topic => topic.cid)).filter(Boolean);
 
 		async function getIgnoredCids() {
@@ -263,17 +263,9 @@ module.exports = function (Topics) {
 			}
 			return await categories.isIgnored(topicCids, uid);
 		}
-		async function getQandACidsMap() {
-			const categoryData = await categories.getCategoriesFields(topicCids, ['cid', 'isQandA']);
-			return _.zipObject(
-				topicCids,
-				categoryData.map(category => category && parseInt(category.isQandA, 10) === 1)
-			);
-		}
-		const [ignoredCids, filtered, qandaCidsMap] = await Promise.all([
+		const [ignoredCids, filtered] = await Promise.all([
 			getIgnoredCids(),
 			user.blocks.filter(uid, topicData),
-			getQandACidsMap(),
 		]);
 
 		const isCidIgnored = _.zipObject(topicCids, ignoredCids);
@@ -281,22 +273,13 @@ module.exports = function (Topics) {
 
 		const cids = params.cids && params.cids.map(String);
 		const { tags } = params;
-		const filterResolved = filter === 'resolved';
-		const filterUnresolved = filter === 'unresolved';
 		tids = topicData.filter(t => (
 			t &&
 			t.cid &&
 			!isCidIgnored[t.cid] &&
 			(cids || parseInt(t.cid, 10) !== -1) &&
 			(!cids || cids.includes(String(t.cid))) &&
-			(!tags.length || tags.every(tag => t.tags.find(topicTag => topicTag.value === tag))) &&
-			(
-				(!filterResolved && !filterUnresolved) ||
-				(qandaCidsMap[t.cid] && (
-					(filterResolved && parseInt(t.resolved, 10) === 1) ||
-					(filterUnresolved && parseInt(t.resolved, 10) !== 1)
-				))
-			)
+			(!tags.length || tags.every(tag => t.tags.find(topicTag => topicTag.value === tag)))
 		)).map(t => t.tid);
 
 		const result = await plugins.hooks.fire('filter:topics.filterSortedTids', {

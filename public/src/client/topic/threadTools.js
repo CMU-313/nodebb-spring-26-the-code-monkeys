@@ -51,16 +51,6 @@ define('forum/topic/threadTools', [
 			return false;
 		});
 
-		topicContainer.on('click', '[component="topic/resolve"]', function () {
-			topicCommand('put', '/resolve', 'resolve');
-			return false;
-		});
-
-		topicContainer.on('click', '[component="topic/unresolve"]', function () {
-			topicCommand('del', '/resolve', 'unresolve');
-			return false;
-		});
-
 		topicContainer.on('click', '[component="topic/pin"]', function () {
 			topicCommand('put', '/pin', 'pin');
 			return false;
@@ -402,21 +392,6 @@ define('forum/topic/threadTools', [
 		ajaxify.data.pinned = data.pinned;
 
 		posts.addTopicEvents(data.events);
-	};
-
-	ThreadTools.setResolvedState = function (data) {
-		const threadEl = components.get('topic');
-		if (String(data.tid) !== threadEl.attr('data-tid')) {
-			return;
-		}
-
-		const isResolved = !!(data.isResolved || parseInt(data.resolved, 10) === 1);
-		components.get('topic/resolve').toggleClass('hidden', isResolved).parent().attr('hidden', isResolved ? '' : null);
-		components.get('topic/unresolve').toggleClass('hidden', !isResolved).parent().attr('hidden', !isResolved ? '' : null);
-
-		$('[component="topic/labels"] [component="topic/resolved"]').toggleClass('hidden', !isResolved);
-		$('[component="topic/labels"] [component="topic/unresolved"]').toggleClass('hidden', isResolved);
-		ajaxify.data.resolved = isResolved ? 1 : 0;
 	};
 
 	function setFollowState(state) {

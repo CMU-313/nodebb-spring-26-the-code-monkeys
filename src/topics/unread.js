@@ -90,8 +90,8 @@ module.exports = function (Topics) {
 	};
 
 	async function getTids(params) {
-		const counts = { '': 0, new: 0, watched: 0, unreplied: 0, resolved: 0, unresolved: 0 };
-		const tidsByFilter = { '': [], new: [], watched: [], unreplied: [], resolved: [], unresolved: [] };
+		const counts = { '': 0, new: 0, watched: 0, unreplied: 0 };
+		const tidsByFilter = { '': [], new: [], watched: [], unreplied: [] };
 		const unreadCids = [];
 		if (params.uid <= 0) {
 			return { counts, tids: [], tidsByFilter, unreadCids };
@@ -141,19 +141,12 @@ module.exports = function (Topics) {
 		});
 
 		tids = await privileges.topics.filterTids('topics:read', tids, params.uid);
-		const topicData = (await Topics.getTopicsFields(tids, ['tid', 'cid', 'uid', 'postcount', 'deleted', 'scheduled', 'tags', 'resolved']))
+		const topicData = (await Topics.getTopicsFields(tids, ['tid', 'cid', 'uid', 'postcount', 'deleted', 'scheduled', 'tags']))
 			.filter(t => t.scheduled || !t.deleted);
 		const topicCids = _.uniq(topicData.map(topic => topic.cid)).filter(Boolean);
 
-		const [categoryWatchState, categoryData] = await Promise.all([
-			categories.getWatchState(topicCids, params.uid),
-			categories.getCategoriesFields(topicCids, ['cid', 'isQandA']),
-		]);
+		const categoryWatchState = await categories.getWatchState(topicCids, params.uid);
 		const userCidState = _.zipObject(topicCids, categoryWatchState);
-		const cidIsQandA = _.zipObject(
-			topicCids,
-			categoryData.map(category => category && parseInt(category.isQandA, 10) === 1)
-		);
 
 		const filterCids = params.cid && params.cid.map(cid => utils.isNumber(cid) ? parseInt(cid, 10) : cid);
 		const filterTags = params.tag && params.tag.map(tag => String(tag));
@@ -180,14 +173,6 @@ module.exports = function (Topics) {
 				if (!userReadTimes[topic.tid]) {
 					tidsByFilter.new.push(topic.tid);
 				}
-
-				if (cidIsQandA[topic.cid]) {
-					if (parseInt(topic.resolved, 10) === 1) {
-						tidsByFilter.resolved.push(topic.tid);
-					} else {
-						tidsByFilter.unresolved.push(topic.tid);
-					}
-				}
 			}
 		});
 
@@ -195,8 +180,6 @@ module.exports = function (Topics) {
 		counts.watched = tidsByFilter.watched.length;
 		counts.unreplied = tidsByFilter.unreplied.length;
 		counts.new = tidsByFilter.new.length;
-		counts.resolved = tidsByFilter.resolved.length;
-		counts.unresolved = tidsByFilter.unresolved.length;
 
 		return {
 			counts: counts,

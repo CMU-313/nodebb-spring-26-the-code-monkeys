@@ -7,16 +7,6 @@
 	<a component="topic/unlock" href="#" class="dropdown-item rounded-1 d-flex align-items-center gap-2 {{{ if !locked }}}hidden{{{ end }}}" role="menuitem"><i class="fa fa-fw fa-unlock text-secondary"></i> [[topic:thread-tools.unlock]]</a>
 </li>
 
-{{{ if isQandA }}}
-<li {{{ if resolved }}}hidden{{{ end }}}>
-	<a component="topic/resolve" href="#" class="dropdown-item rounded-1 d-flex align-items-center gap-2 {{{ if resolved }}}hidden{{{ end }}}" role="menuitem"><i class="fa fa-fw fa-check-circle text-secondary"></i> [[topic:thread-tools.resolve]]</a>
-</li>
-
-<li {{{ if !resolved }}}hidden{{{ end }}}>
-	<a component="topic/unresolve" href="#" class="dropdown-item rounded-1 d-flex align-items-center gap-2 {{{ if !resolved }}}hidden{{{ end }}}" role="menuitem"><i class="fa fa-fw fa-undo text-secondary"></i> [[topic:thread-tools.unresolve]]</a>
-</li>
-{{{ end }}}
-
 <li {{{ if pinned }}}hidden{{{ end }}}>
 	<a component="topic/pin" href="#" class="dropdown-item rounded-1 d-flex align-items-center gap-2 {{{ if pinned }}}hidden{{{ end }}}" role="menuitem"><i class="fa fa-fw fa-thumb-tack text-secondary"></i> [[topic:thread-tools.pin]]</a>
 </li>
