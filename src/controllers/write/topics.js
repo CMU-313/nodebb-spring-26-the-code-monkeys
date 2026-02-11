@@ -90,6 +90,16 @@ Topics.unlock = async (req, res) => {
 	helpers.formatApiResponse(200, res);
 };
 
+Topics.resolve = async (req, res) => {
+	await api.topics.resolve(req, { tids: [req.params.tid] });
+	helpers.formatApiResponse(200, res);
+};
+
+Topics.unresolve = async (req, res) => {
+	await api.topics.unresolve(req, { tids: [req.params.tid] });
+	helpers.formatApiResponse(200, res);
+};
+
 Topics.follow = async (req, res) => {
 	await api.topics.follow(req, req.params);
 	helpers.formatApiResponse(200, res);

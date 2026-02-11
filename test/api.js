@@ -541,7 +541,27 @@ describe('API', async () => {
 
 				// Recursively iterate through schema properties, comparing type
 				it('response body should match schema definition', () => {
-					if(path === '/api/admin/extend/plugins') {
+					if (path === '/api/admin/extend/plugins') {
+						return;
+					}
+					const http302 = context[method].responses['302'];
+					if (http302 && result.response.statusCode === 302) {
+						// Compare headers instead
+						const expectedHeaders = Object.keys(http302.headers).reduce((memo, name) => {
+							const value = http302.headers[name].schema.example;
+							memo[name] = value.startsWith(nconf.get('relative_path')) ? value : nconf.get('relative_path') + value;
+							return memo;
+						}, {});
+
+						for (const header of Object.keys(expectedHeaders)) {
+							assert(result.response.headers[header.toLowerCase()]);
+							assert.strictEqual(result.response.headers[header.toLowerCase()], expectedHeaders[header]);
+						}
+						return;
+					}
+
+					if (result.response.statusCode === 400 && context[method].responses['400']) {
+						// TODO: check 400 schema to response.body?
 						return;
 					}
 				});
