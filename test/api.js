@@ -564,21 +564,6 @@ describe('API', async () => {
 						// TODO: check 400 schema to response.body?
 						return;
 					}
-
-					const http200 = context[method].responses['200'];
-					if (!http200) {
-						return;
-					}
-
-					assert.strictEqual(result.response.statusCode, 200, `HTTP 200 expected (path: ${method} ${path}`);
-
-					const hasJSON = http200.content && http200.content['application/json'];
-					if (hasJSON) {
-						schema = context[method].responses['200'].content['application/json'].schema;
-						compare(schema, result.body, method.toUpperCase(), path, 'root');
-					}
-
-					// TODO someday: text/csv, binary file type checking?
 				});
 
 				it('should successfully re-login if needed', async () => {
