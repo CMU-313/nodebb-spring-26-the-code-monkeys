@@ -385,6 +385,7 @@ paths:
           required: true
           schema:
             type: string
+            example: "bookmarks"
       responses:
         "200":
           description: OK
