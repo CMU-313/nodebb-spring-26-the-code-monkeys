@@ -383,9 +383,9 @@ paths:
         - in: path
           name: folderId
           required: true
+          example: "bookmarks"
           schema:
             type: string
-            example: "bookmarks"
       responses:
         "200":
           description: OK
