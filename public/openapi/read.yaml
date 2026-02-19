@@ -378,7 +378,7 @@ paths:
     get:
       tags:
         - folders
-      summary: Get folder by id
+      summary: Get folder by id number
       parameters:
         - in: path
           name: folderId
