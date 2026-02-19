@@ -4,6 +4,8 @@ const util = require('util');
 const winston = require('winston');
 
 const sleep = util.promisify(setTimeout);
+const folders = require('../user/folders');
+const Posts = require('../posts');
 
 const user = require('../user');
 const topics = require('../topics');
@@ -194,5 +196,37 @@ SocketUser.gdpr.check = async function (socket, data) {
 	}
 	return await db.getObjectField(`user:${data.uid}`, 'gdpr_consent');
 };
+
+SocketUser.foldersCreate = async function (socket, data) {
+	if (!socket.uid) throw new Error('not-logged-in');
+	return await folders.create(socket.uid, data.name);
+};
+
+SocketUser.foldersDelete = async function (socket, data) {
+	if (!socket.uid) throw new Error('not-logged-in');
+	return await folders.delete(socket.uid, data.folderId);
+};
+
+SocketUser.foldersList = async function (socket) {
+	if (!socket.uid) throw new Error('not-logged-in');
+	return await folders.list(socket.uid);
+};
+
+SocketUser.foldersAdd = async function (socket, data) {
+	if (!socket.uid) throw new Error('not-logged-in');
+
+	const post = await Posts.getPostData(data.pid);
+	if (!post) throw new Error('invalid-post');
+
+	await folders.addPid(socket.uid, data.folderId, data.pid);
+};
+
+SocketUser.foldersGet = async function (socket, data) {
+	if (!socket.uid) throw new Error('not-logged-in');
+
+	const pids = await folders.getPids(socket.uid, data.folderId, 0, 19);
+	return await Posts.getPostsByPids(pids, socket.uid);
+};
+
 
 require('../promisify')(SocketUser);

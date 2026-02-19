@@ -92,6 +92,14 @@
 			<span component="post/bookmark-count" class="bookmarkCount badge bg-secondary" data-bookmarks="{posts.bookmarks}">{posts.bookmarks}</span>&nbsp;
 		</a>
 	</li>
+
+	<li>
+		<a class="dropdown-item rounded-1 d-flex align-items-center gap-2" component="post/add-to-folder" role="menuitem" href="#">
+			<span class="menu-icon"><i class="fa fa-fw text-secondary fa-folder"></i></span>
+			<span>Add to folder</span>
+		</a>
+	</li>
+
 	{{{ end }}}
 
 
