@@ -105,6 +105,12 @@ body:not(.page-user) {
 	background-color: var(--bs-warning-bg-subtle);
 	border-color: var(--bs-warning-border-subtle) !important;
 }
+
+.qa-accepted-answer-badge {
+	color: var(--bs-success-text-emphasis);
+	background-color: var(--bs-success-bg-subtle);
+	border-color: var(--bs-success-border-subtle) !important;
+}
 // quartz doesn't need body-bg for tool background
 .skin-quartz .sticky-tools {
 	background-color: initial;
