@@ -100,6 +100,19 @@ Topics.unresolve = async (req, res) => {
 	helpers.formatApiResponse(200, res);
 };
 
+Topics.acceptAnswer = async (req, res) => {
+	await api.topics.acceptAnswer(req, {
+		tids: [req.params.tid],
+		pids: [req.params.pid],
+	});
+	helpers.formatApiResponse(200, res);
+};
+
+Topics.unacceptAnswer = async (req, res) => {
+	await api.topics.unacceptAnswer(req, { tids: [req.params.tid] });
+	helpers.formatApiResponse(200, res);
+};
+
 Topics.follow = async (req, res) => {
 	await api.topics.follow(req, req.params);
 	helpers.formatApiResponse(200, res);

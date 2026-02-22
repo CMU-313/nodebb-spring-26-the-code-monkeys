@@ -14,6 +14,8 @@ describe('Q&A Features (Categories + Data Model)', () => {
 	let nonQandaCid;
 	let topicData;
 	let nonQandaTopicData;
+	let qandaReplyPid;
+	let nonQandaReplyPid;
 
 	before(async () => {
 		adminUid = await User.create({ username: 'qanda_admin' });
@@ -100,6 +102,25 @@ describe('Q&A Features (Categories + Data Model)', () => {
 			nonQandaTopicData = result.topicData;
 			assert.strictEqual(nonQandaTopicData.resolved, 0);
 		});
+
+		it('should create replies for accepted answer tests', async () => {
+			const [qandaReply, nonQandaReply] = await Promise.all([
+				Topics.reply({
+					uid: adminUid,
+					tid: topicData.tid,
+					content: 'This is a candidate accepted answer',
+				}),
+				Topics.reply({
+					uid: adminUid,
+					tid: nonQandaTopicData.tid,
+					content: 'This is a non-Q&A reply',
+				}),
+			]);
+			qandaReplyPid = qandaReply.pid;
+			nonQandaReplyPid = nonQandaReply.pid;
+			assert(qandaReplyPid);
+			assert(nonQandaReplyPid);
+		});
 	});
 
 	describe('Resolve/unresolve topic tools', () => {
@@ -122,6 +143,45 @@ describe('Q&A Features (Categories + Data Model)', () => {
 		it('should reject resolving a topic in a non-Q&A category', async () => {
 			await assert.rejects(
 				Topics.tools.resolve(nonQandaTopicData.tid, adminUid),
+				/\[\[error:invalid-data\]\]/
+			);
+		});
+	});
+
+	describe('Accept/unaccept answer topic tools', () => {
+		it('should accept a reply in a Q&A category', async () => {
+			const acceptedData = await Topics.tools.acceptAnswer(topicData.tid, qandaReplyPid, adminUid);
+			assert.strictEqual(acceptedData.acceptedPid, qandaReplyPid);
+
+			const persisted = await Topics.getTopicField(topicData.tid, 'acceptedPid');
+			assert.strictEqual(persisted, qandaReplyPid);
+		});
+
+		it('should unaccept a reply in a Q&A category', async () => {
+			const data = await Topics.tools.unacceptAnswer(topicData.tid, adminUid);
+			assert.strictEqual(data.acceptedPid, 0);
+
+			const persisted = await Topics.getTopicField(topicData.tid, 'acceptedPid');
+			assert.strictEqual(persisted, 0);
+		});
+
+		it('should reject accepting the main post as an answer', async () => {
+			await assert.rejects(
+				Topics.tools.acceptAnswer(topicData.tid, topicData.mainPid, adminUid),
+				/\[\[error:invalid-data\]\]/
+			);
+		});
+
+		it('should reject accepting a reply from another topic', async () => {
+			await assert.rejects(
+				Topics.tools.acceptAnswer(topicData.tid, nonQandaReplyPid, adminUid),
+				/\[\[error:invalid-data\]\]/
+			);
+		});
+
+		it('should reject accepting an answer in a non-Q&A category', async () => {
+			await assert.rejects(
+				Topics.tools.acceptAnswer(nonQandaTopicData.tid, nonQandaReplyPid, adminUid),
 				/\[\[error:invalid-data\]\]/
 			);
 		});

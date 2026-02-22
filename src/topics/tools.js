@@ -100,6 +100,14 @@ module.exports = function (Topics) {
 		return await toggleResolve(tid, uid, false);
 	};
 
+	topicTools.acceptAnswer = async function (tid, pid, uid) {
+		return await toggleAcceptedAnswer(tid, pid, uid, true);
+	};
+
+	topicTools.unacceptAnswer = async function (tid, uid) {
+		return await toggleAcceptedAnswer(tid, 0, uid, false);
+	};
+
 	async function toggleLock(tid, uid, lock) {
 		const topicData = await Topics.getTopicFields(tid, ['tid', 'uid', 'cid']);
 		if (!topicData || !topicData.cid) {
@@ -140,6 +148,48 @@ module.exports = function (Topics) {
 		topicData.resolved = resolve ? 1 : 0;
 
 		plugins.hooks.fire('action:topic.resolve', { topic: _.clone(topicData), uid: uid });
+		return topicData;
+	}
+
+	async function toggleAcceptedAnswer(tid, pid, uid, accept) {
+		const topicData = await Topics.getTopicFields(tid, ['tid', 'uid', 'cid', 'mainPid', 'acceptedPid']);
+		if (!topicData || !topicData.cid) {
+			throw new Error('[[error:no-topic]]');
+		}
+
+		const [isQandA, canAccept] = await Promise.all([
+			categories.isQandACategory(topicData.cid),
+			privileges.topics.canEdit(tid, uid),
+		]);
+		if (!isQandA) {
+			throw new Error('[[error:invalid-data]]');
+		}
+		if (!canAccept) {
+			throw new Error('[[error:no-privileges]]');
+		}
+
+		if (accept) {
+			if (!utils.isNumber(pid)) {
+				throw new Error('[[error:invalid-data]]');
+			}
+			const postData = await db.getObjectFields(`post:${pid}`, ['tid', 'deleted']);
+			if (!postData || !postData.tid) {
+				throw new Error('[[error:no-post]]');
+			}
+			if (
+				parseInt(postData.deleted, 10) === 1 ||
+				String(postData.tid) !== String(tid) ||
+				String(pid) === String(topicData.mainPid)
+			) {
+				throw new Error('[[error:invalid-data]]');
+			}
+		}
+
+		const acceptedPid = accept ? parseInt(pid, 10) : 0;
+		await Topics.setTopicField(tid, 'acceptedPid', acceptedPid);
+		topicData.acceptedPid = acceptedPid;
+
+		plugins.hooks.fire('action:topic.acceptAnswer', { topic: _.clone(topicData), uid: uid });
 		return topicData;
 	}
 
