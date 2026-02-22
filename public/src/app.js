@@ -327,18 +327,33 @@ if (document.readyState === 'loading') {
 		});
 	};
 
-	app.parseAndTranslate = function (template, options, callback) {
-		if (typeof options !== 'object' || options === null) {
-			options = { data: options };
-		}
-	
-		let { blockName, data } = options;
-
-		if (typeof blockName !== 'string') {
+	app.parseAndTranslate = function (template, blockName, data, callback) {
+		// Supported signatures:
+		// (template, data)
+		// (template, data, callback)
+		// (template, blockName, data)
+		// (template, blockName, data, callback)
+		// (template, { blockName, data }, callback)
+		if (typeof blockName === 'object' && blockName !== null &&
+			(Object.prototype.hasOwnProperty.call(blockName, 'blockName') ||
+				Object.prototype.hasOwnProperty.call(blockName, 'data'))) {
+			callback = data;
+			data = blockName.data;
+			blockName = blockName.blockName;
+		} else if (typeof blockName === 'function') {
+			callback = blockName;
+			blockName = undefined;
+			data = {};
+		} else if (typeof blockName !== 'string') {
 			callback = data;
 			data = blockName;
 			blockName = undefined;
+		} else if (typeof data === 'function') {
+			callback = data;
+			data = {};
 		}
+
+		data = data || {};
 
 		return new Promise((resolve, reject) => {
 			require(['translator', 'benchpress'], function (translator, Benchpress) {
