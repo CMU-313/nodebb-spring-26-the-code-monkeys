@@ -45,6 +45,7 @@ _mounts.main = (app, middleware, controllers) => {
 	app.post('/email/unsubscribe/:token', controllers.accounts.settings.unsubscribePost);
 	setupPageRoute(app, '/folders', [middleware.ensureLoggedIn], controllers.folders.get);
 	setupPageRoute(app, '/folders/bookmarks', [middleware.ensureLoggedIn], controllers.folders.bookmarks.get);
+	setupPageRoute(app, '/folders/:folderId', [middleware.ensureLoggedIn], controllers.folders.folder.get);
 
 
 	app.post('/compose', middleware.applyCSRF, controllers.composer.post);
@@ -89,7 +90,7 @@ _mounts.categories = (app, name, middleware, controllers) => {
 	setupPageRoute(app, '/unread', [middleware.ensureLoggedIn], controllers.unread.get);
 	setupPageRoute(app, '/folders', [middleware.ensureLoggedIn], controllers.folders.get);
 	setupPageRoute(app, '/folders/bookmarks', [middleware.ensureLoggedIn], controllers.folders.bookmarks.get);
-
+	setupPageRoute(app, '/folders/:folderId', [middleware.ensureLoggedIn], controllers.folders.folder.get);
 };
 
 _mounts.category = (app, name, middleware, controllers) => {

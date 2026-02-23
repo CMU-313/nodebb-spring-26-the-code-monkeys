@@ -12,7 +12,8 @@ define('forum/topic/postTools', [
 	'alerts',
 	'hooks',
 	'helpers',
-], function (share, navigator, components, translator, votes, api, bootbox, alerts, hooks, helpers) {
+	'utils',
+], function (share, navigator, components, translator, votes, api, bootbox, alerts, hooks, helpers, utils) {
 	const PostTools = {};
 
 	let staleReplyAnyway = false;
@@ -128,10 +129,60 @@ define('forum/topic/postTools', [
 		postContainer.on('click', '[component="post/bookmark"]', function () {
 			return bookmarkPost($(this), getData($(this), 'data-pid'));
 		});
+		postContainer.on('click', '[component="post/add-to-folder"]', async function (e) {
+			e.preventDefault();
+		
+			const pid = getData($(this), 'data-pid');
+		
+			socket.emit('user.foldersList', async function (err, folders) {
+				if (err) return alerts.error(err);
+		
+				if (!folders || !folders.length) {
+					return bootbox.prompt('Folder name', function (name) {
+						if (!name) return;
+						socket.emit('user.foldersCreate', { name }, function (err2, created) {
+							if (err2) return alerts.error(err2);
+							socket.emit('user.foldersAdd', { folderId: created.id, pid }, function (err3) {
+								if (err3) return alerts.error(err3);
+								alerts.success('Added to folder');
+							});
+						});
+					});
+				}
+		
+				const html = await app.parseAndTranslate('modals/add-to-folder', { folders });
+		
+				const modal = bootbox.dialog({
+					title: 'Add to folder',
+					message: html,
+					backdrop: true,
+					closeButton: true,
+					onEscape: true,
+				});
+		
+				modal.on('click', '[data-action="cancel"]', function () {
+					modal.modal('hide');
+				});
+		
+				modal.on('click', '[data-action="add"]', function () {
+					const folderId = modal.find('input.folder-radio:checked').val();
+					if (!folderId) return;
+		
+					socket.emit('user.foldersAdd', { folderId, pid }, function (err4) {
+						if (err4) return alerts.error(err4);
+						modal.modal('hide');
+						alerts.success('Added to folder');
+					});
+				});
+			});
+		});
+		
+		
 
 		postContainer.on('click', '[component="post/upvote"]', function () {
 			return votes.toggleVote($(this), '.upvoted', 1);
 		});
+
 
 		postContainer.on('click', '[component="post/downvote"]', function () {
 			return votes.toggleVote($(this), '.downvoted', -1);
@@ -501,7 +552,8 @@ define('forum/topic/postTools', [
 		warning.modal();
 	}
 
-	const selectionChangeFn = utils.debounce(selectionChange, 250);
+	const selectionChangeFn = (utils && utils.debounce) ? utils.debounce(selectionChange, 250) : function () {};
+
 
 	function handleSelectionTooltip() {
 		if (!ajaxify.data.privileges['topics:reply']) {

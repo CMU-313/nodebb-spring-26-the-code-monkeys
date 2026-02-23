@@ -374,3 +374,18 @@ paths:
     $ref: 'read/folders.yaml'
   /api/folders/bookmarks:
     $ref: 'read/folders/bookmarks.yaml'
+  /api/folders/{folderId}:
+    get:
+      tags:
+        - folders
+      summary: Get folder by id number
+      parameters:
+        - in: path
+          name: folderId
+          required: true
+          example: "bookmarks"
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK

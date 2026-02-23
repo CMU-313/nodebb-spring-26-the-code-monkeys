@@ -1,8 +1,8 @@
 <div class="d-flex justify-content-between align-items-start mb-3">
 	<div>
-		<h2 class="text-uppercase fw-bold mb-1">Bookmarked</h2>
+		<h2 class="text-uppercase fw-bold mb-1">{folderName}</h2>
 		{{{ if user.username }}}
-		<div class="text-muted small">Bookmarks for {user.username}</div>
+		<div class="text-muted small">{folderName} for {user.username}</div>
 		{{{ end }}}
 	</div>
 </div>
@@ -15,7 +15,7 @@
 
 {{{ if !hasItems }}}
 <div class="alert alert-info mb-0">
-	You don’t have any bookmarked posts yet.
+	You don’t have any posts in this folder yet.
 </div>
 {{{ end }}}
 
