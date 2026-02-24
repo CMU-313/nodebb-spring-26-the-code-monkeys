@@ -161,6 +161,8 @@ module.exports = function (Topics) {
 
 	Topics.modifyPostsByPrivilege = function (topicData, topicPrivileges) {
 		const loggedIn = parseInt(topicPrivileges.uid, 10) > 0;
+		const isQandA = !!topicData.isQandA;
+		const acceptedPid = parseInt(topicData.acceptedPid, 10) || 0;
 		topicData.posts.forEach((post) => {
 			if (post) {
 				post.topicOwnerPost = parseInt(topicData.uid, 10) === parseInt(post.uid, 10);
@@ -172,6 +174,11 @@ module.exports = function (Topics) {
 					(post.selfPost && !topicData.locked && !post.deleted) ||
 					(post.selfPost && post.deleted && parseInt(post.deleterUid, 10) === parseInt(topicPrivileges.uid, 10)) ||
 					((loggedIn || topicData.postSharing.length) && !post.deleted);
+				post.isAcceptedAnswer = acceptedPid > 0 && String(post.pid) === String(acceptedPid);
+				post.display_accept_answer_quick = topicPrivileges.isAdminOrMod &&
+					isQandA &&
+					post.index !== 0 &&
+					!post.deleted;
 				post.ip = topicPrivileges.isAdminOrMod ? post.ip : undefined;
 
 				posts.modifyPostByPrivilege(post, topicPrivileges);

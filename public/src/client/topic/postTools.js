@@ -30,6 +30,10 @@ define('forum/topic/postTools', [
 		votes.addVoteHandler();
 
 		PostTools.updatePostCount(ajaxify.data.postcount);
+		PostTools.setAcceptedAnswerState({
+			tid: tid,
+			acceptedPid: ajaxify.data.acceptedPid,
+		});
 	};
 
 	function renderMenu() {
@@ -97,6 +101,30 @@ define('forum/topic/postTools', [
 		postCountEl.attr('title', postCount)
 			.html(helpers.humanReadableNumber(postCount));
 		navigator.setCount(postCount);
+	};
+
+	PostTools.setAcceptedAnswerState = function (data) {
+		const threadEl = components.get('topic');
+		if (!data || String(data.tid) !== threadEl.attr('data-tid')) {
+			return;
+		}
+
+		const acceptedPid = parseInt(data.acceptedPid, 10) || 0;
+		ajaxify.data.acceptedPid = acceptedPid;
+
+		threadEl.find('[component="post"]').each(function () {
+			const postEl = $(this);
+			const pid = postEl.attr('data-pid');
+			const isAcceptedAnswer = acceptedPid > 0 && String(pid) === String(acceptedPid);
+
+			postEl.toggleClass('accepted-answer', isAcceptedAnswer);
+			postEl.find('[component="post/accepted-answer-badge"]').toggleClass('hidden', !isAcceptedAnswer);
+
+			const acceptEl = postEl.find('[component="post/accept-answer-quick"]');
+			const unacceptEl = postEl.find('[component="post/unaccept-answer-quick"]');
+			acceptEl.toggleClass('hidden', isAcceptedAnswer);
+			unacceptEl.toggleClass('hidden', !isAcceptedAnswer);
+		});
 	};
 
 	function addPostHandlers(tid) {
@@ -178,6 +206,15 @@ define('forum/topic/postTools', [
 		});
 		
 		
+
+		postContainer.on('click', '[component="post/accept-answer-quick"]', function () {
+			const pid = getData($(this), 'data-pid');
+			return toggleAcceptedAnswer(pid, true);
+		});
+
+		postContainer.on('click', '[component="post/unaccept-answer-quick"]', function () {
+			return toggleAcceptedAnswer(null, false);
+		});
 
 		postContainer.on('click', '[component="post/upvote"]', function () {
 			return votes.toggleVote($(this), '.upvoted', 1);
@@ -433,6 +470,17 @@ define('forum/topic/postTools', [
 			const type = method === 'put' ? 'bookmark' : 'unbookmark';
 			hooks.fire(`action:post.${type}`, { pid: pid });
 		});
+		return false;
+	}
+
+	function toggleAcceptedAnswer(pid, accept) {
+		const tid = ajaxify.data.tid;
+		const method = accept ? 'put' : 'del';
+		const path = accept ?
+			`/topics/${encodeURIComponent(tid)}/answer/${encodeURIComponent(pid)}` :
+			`/topics/${encodeURIComponent(tid)}/answer`;
+
+		api[method](path).catch(alerts.error);
 		return false;
 	}
 

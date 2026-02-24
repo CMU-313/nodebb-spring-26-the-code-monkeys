@@ -31,6 +31,8 @@ define('forum/topic/events', [
 
 		'event:topic_resolved': threadTools.setResolvedState,
 		'event:topic_unresolved': threadTools.setResolvedState,
+		'event:topic_answer_accepted': postTools.setAcceptedAnswerState,
+		'event:topic_answer_unaccepted': postTools.setAcceptedAnswerState,
 
 		'event:topic_moved': onTopicMoved,
 

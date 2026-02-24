@@ -76,6 +76,7 @@
 			</div>
 			<div class="d-flex align-items-center gap-1 justify-content-end">
 				<span class="bookmarked opacity-0 text-primary"><i class="fa fa-bookmark-o"></i></span>
+				<span component="post/accepted-answer-badge" class="badge border qa-accepted-answer-badge {{{ if !posts.isAcceptedAnswer }}}hidden{{{ end }}}">[[topic:accepted-answer]]</span>
 				<a href="{config.relative_path}/post/{encodeURIComponent(./pid)}" class="post-index text-muted d-none d-md-inline">#{increment(./index, "1")}</a>
 			</div>
 		</div>
@@ -132,6 +133,15 @@
 						</a>
 						{{{ end }}}
 					</div>
+					{{{ end }}}
+
+					{{{ if posts.display_accept_answer_quick }}}
+					<a component="post/accept-answer-quick" href="#" class="btn btn-ghost btn-sm {{{ if posts.isAcceptedAnswer }}}hidden{{{ end }}}" title="[[topic:accept-answer]]">
+						<i class="fa fa-fw fa-check-circle text-success"></i>
+					</a>
+					<a component="post/unaccept-answer-quick" href="#" class="btn btn-ghost btn-sm {{{ if !posts.isAcceptedAnswer }}}hidden{{{ end }}}" title="[[topic:unaccept-answer]]">
+						<i class="fa fa-fw fa-undo text-success"></i>
+					</a>
 					{{{ end }}}
 
 					<!-- IMPORT partials/topic/post-menu.tpl -->

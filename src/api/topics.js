@@ -177,6 +177,32 @@ topicsAPI.unresolve = async function (caller, data) {
 	});
 };
 
+topicsAPI.acceptAnswer = async function (caller, data) {
+	if (!Array.isArray(data.tids) || !Array.isArray(data.pids) || data.tids.length !== data.pids.length) {
+		throw new Error('[[error:invalid-data]]');
+	}
+
+	const [exists, uids] = await Promise.all([
+		topics.exists(data.tids),
+		user.getUidsFromSet('users:online', 0, -1),
+	]);
+	if (!exists.every(Boolean)) {
+		throw new Error('[[error:no-topic]]');
+	}
+
+	await Promise.all(data.tids.map(async (tid, index) => {
+		const topicData = await topics.tools.acceptAnswer(tid, data.pids[index], caller.uid);
+		const notifyUids = await privileges.categories.filterUids('topics:read', topicData.cid, uids);
+		socketHelpers.emitToUids('event:topic_answer_accepted', topicData, notifyUids);
+	}));
+};
+
+topicsAPI.unacceptAnswer = async function (caller, data) {
+	await doTopicAction('unacceptAnswer', 'event:topic_answer_unaccepted', caller, {
+		tids: data.tids,
+	});
+};
+
 topicsAPI.follow = async function (caller, data) {
 	await topics.follow(data.tid, caller.uid);
 };
