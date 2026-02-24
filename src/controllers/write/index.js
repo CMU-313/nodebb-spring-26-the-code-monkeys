@@ -14,3 +14,4 @@ Write.search = require('./search');
 Write.admin = require('./admin');
 Write.files = require('./files');
 Write.utilities = require('./utilities');
+Write.ohqueue = require('./ohqueue');
