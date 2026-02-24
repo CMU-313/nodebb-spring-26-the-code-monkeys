@@ -149,6 +149,20 @@ module.exports = function (Topics) {
 					postObj.user.username = validator.escape(String(postObj.handle));
 					postObj.user.displayname = postObj.user.username;
 				}
+				// Anonymous posting: Hide user identity for anonymous posts
+				if (postObj.anonymous) {
+					postObj.user = {
+						uid: 0,
+						username: 'Anonymous',
+						userslug: '',
+						picture: null,
+						status: 'offline',
+						banned: false,
+						displayname: 'Anonymous',
+						'icon:bgColor': '#808080',
+						'icon:text': '?',
+					};
+				}
 			}
 		});
 
