@@ -139,6 +139,19 @@ Topics.getTopicsByTids = async function (tids, options) {
 				topic.user.username = validator.escape(result.tidToGuestHandle[topic.tid]);
 				topic.user.displayname = topic.user.username;
 			}
+			if (topic.anonymous) {
+				topic.user = {
+					uid: 0,
+					username: 'Anonymous',
+					userslug: '',
+					reputation: 0,
+					postcount: 0,
+					picture: null,
+					signature: '',
+					banned: false,
+					status: 'offline',
+				};
+			}
 			topic.teaser = result.teasers[i] || null;
 			topic.isOwner = topic.uid === parseInt(uid, 10);
 			topic.ignored = followData[i].ignoring;
