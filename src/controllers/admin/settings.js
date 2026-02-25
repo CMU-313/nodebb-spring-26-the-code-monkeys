@@ -218,3 +218,9 @@ settingsController.advanced = async (req, res) => {
 		groupsExemptFromMaintenanceMode: groupData,
 	});
 };
+
+settingsController.ohqueue = async (req, res) => {
+	res.render('admin/settings/ohqueue', {
+		title: 'OH Queue Settings',
+	});
+};

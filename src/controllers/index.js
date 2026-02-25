@@ -41,6 +41,7 @@ Controllers['404'] = require('./404');
 Controllers.errors = require('./errors');
 Controllers.composer = require('./composer');
 Controllers.folders = require('./folders');
+Controllers.ohqueue = require('./ohqueue');
 
 
 Controllers.write = require('./write');
