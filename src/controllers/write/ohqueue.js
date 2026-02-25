@@ -18,7 +18,6 @@ OHQueue.leave = async (req, res) => {
 OHQueue.getQueue = async (req, res) => {
 	const entries = await api.ohqueue.getQueue(req, {
 		cid: req.params.cid,
-		filter: req.query.filter,
 	});
 	helpers.formatApiResponse(200, res, entries);
 };
@@ -38,13 +37,6 @@ OHQueue.assign = async (req, res) => {
 	helpers.formatApiResponse(200, res, entry);
 };
 
-OHQueue.startSession = async (req, res) => {
-	const entry = await api.ohqueue.startSession(req, {
-		id: req.params.id,
-	});
-	helpers.formatApiResponse(200, res, entry);
-};
-
 OHQueue.resolve = async (req, res) => {
 	const entry = await api.ohqueue.resolve(req, {
 		id: req.params.id,
@@ -52,24 +44,10 @@ OHQueue.resolve = async (req, res) => {
 	helpers.formatApiResponse(200, res, entry);
 };
 
-OHQueue.requeue = async (req, res) => {
-	const entry = await api.ohqueue.requeue(req, {
-		id: req.params.id,
-	});
-	helpers.formatApiResponse(200, res, entry);
-};
-
-OHQueue.takeNext = async (req, res) => {
-	const entry = await api.ohqueue.takeNext(req, {
-		cid: req.params.cid,
-	});
-	helpers.formatApiResponse(200, res, entry);
-};
-
 OHQueue.setQueueOpen = async (req, res) => {
-	await api.ohqueue.setQueueOpen(req, {
+	const result = await api.ohqueue.setQueueOpen(req, {
 		cid: req.params.cid,
 		open: req.body.open,
 	});
-	helpers.formatApiResponse(200, res);
+	helpers.formatApiResponse(200, res, result);
 };

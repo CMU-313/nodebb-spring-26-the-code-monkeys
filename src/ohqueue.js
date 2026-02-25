@@ -8,7 +8,6 @@ const OHQueue = module.exports;
 OHQueue.STATUSES = {
 	WAITING: 'waiting',
 	ASSIGNED: 'assigned',
-	IN_PROGRESS: 'in_progress',
 	DONE: 'done',
 };
 
@@ -76,7 +75,6 @@ OHQueue.join = async function (cid, uid) {
 	};
 	await db.setObject(`ohqueue:entry:${id}`, entry);
 	await db.sortedSetAdd(`cid:${cid}:ohqueue`, now, id);
-	await db.sortedSetAdd(`cid:${cid}:ohqueue:waiting`, now, id);
 	return entry;
 };
 
@@ -107,7 +105,7 @@ OHQueue.assign = async function (id, taUid) {
 	return await OHQueue.getEntry(id);
 };
 
-OHQueue.startSession = async function (id) {
+OHQueue.resolve = async function (id) {
 	const entry = await OHQueue.getEntry(id);
 	if (!entry) {
 		throw new Error('[[error:oh-queue-entry-not-found]]');
@@ -115,51 +113,12 @@ OHQueue.startSession = async function (id) {
 	if (entry.status !== OHQueue.STATUSES.ASSIGNED) {
 		throw new Error('[[error:oh-queue-invalid-state]]');
 	}
-	await changeStatus(entry, OHQueue.STATUSES.IN_PROGRESS);
-	return await OHQueue.getEntry(id);
-};
-
-OHQueue.resolve = async function (id) {
-	const entry = await OHQueue.getEntry(id);
-	if (!entry) {
-		throw new Error('[[error:oh-queue-entry-not-found]]');
-	}
-	if (entry.status !== OHQueue.STATUSES.IN_PROGRESS) {
-		throw new Error('[[error:oh-queue-invalid-state]]');
-	}
 	await changeStatus(entry, OHQueue.STATUSES.DONE);
 	return await OHQueue.getEntry(id);
 };
 
-OHQueue.requeue = async function (id) {
-	const entry = await OHQueue.getEntry(id);
-	if (!entry) {
-		throw new Error('[[error:oh-queue-entry-not-found]]');
-	}
-	if (entry.status === OHQueue.STATUSES.DONE) {
-		throw new Error('[[error:oh-queue-invalid-state]]');
-	}
-	await changeStatus(entry, OHQueue.STATUSES.WAITING, { assignedTo: 0 });
-	return await OHQueue.getEntry(id);
-};
-
-OHQueue.takeNext = async function (cid, taUid) {
-	const ids = await db.getSortedSetRange(
-		`cid:${cid}:ohqueue:waiting`, 0, 0
-	);
-	if (!ids.length) {
-		return null;
-	}
-	return await OHQueue.assign(ids[0], taUid);
-};
-
-OHQueue.getQueueByCid = async function (cid, filter) {
-	let key = `cid:${cid}:ohqueue`;
-	const validFilters = Object.values(OHQueue.STATUSES);
-	if (filter && validFilters.includes(filter)) {
-		key = `cid:${cid}:ohqueue:${filter}`;
-	}
-	const ids = await db.getSortedSetRange(key, 0, -1);
+OHQueue.getQueueByCid = async function (cid) {
+	const ids = await db.getSortedSetRange(`cid:${cid}:ohqueue`, 0, -1);
 	if (!ids.length) {
 		return [];
 	}
@@ -170,15 +129,16 @@ OHQueue.getQueueByCid = async function (cid, filter) {
 OHQueue.getPosition = async function (cid, uid) {
 	const entry = await OHQueue.getActiveEntryByCidAndUid(cid, uid);
 	if (!entry || entry.status !== OHQueue.STATUSES.WAITING) {
-		return { position: -1, ahead: 0, estimatedWait: 0 };
+		return { position: -1, ahead: 0 };
 	}
-	const waitingIds = await db.getSortedSetRange(
-		`cid:${cid}:ohqueue:waiting`, 0, -1
-	);
+	const allIds = await db.getSortedSetRange(`cid:${cid}:ohqueue`, 0, -1);
+	const allEntries = await db.getObjects(allIds.map(id => `ohqueue:entry:${id}`));
+	const waitingIds = allEntries
+		.filter(e => e && e.status === OHQueue.STATUSES.WAITING)
+		.map(e => String(e.id));
 	const idx = waitingIds.indexOf(String(entry.id));
 	const ahead = idx >= 0 ? idx : 0;
-	const estimatedWait = ahead * 10;
-	return { position: idx + 1, ahead, estimatedWait };
+	return { position: idx + 1, ahead };
 };
 
 function parseEntry(entry) {
@@ -195,17 +155,14 @@ function parseEntry(entry) {
 }
 
 async function removeEntry(entry) {
-	const { id, cid, status } = entry;
+	const { id, cid } = entry;
 	await db.sortedSetRemove(`cid:${cid}:ohqueue`, id);
-	await db.sortedSetRemove(`cid:${cid}:ohqueue:${status}`, id);
 	await db.delete(`ohqueue:entry:${id}`);
 }
 
 async function changeStatus(entry, newStatus, extra) {
-	const { id, cid, status: oldStatus } = entry;
-	await db.sortedSetRemove(`cid:${cid}:ohqueue:${oldStatus}`, id);
+	const { id } = entry;
 	const now = Date.now();
 	const updates = { status: newStatus, updatedAt: now, ...extra };
 	await db.setObject(`ohqueue:entry:${id}`, updates);
-	await db.sortedSetAdd(`cid:${cid}:ohqueue:${newStatus}`, now, id);
 }

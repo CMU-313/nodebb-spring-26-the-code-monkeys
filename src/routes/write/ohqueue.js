@@ -16,11 +16,8 @@ module.exports = function () {
 	setupApiRoute(router, 'get', '/:cid/position', [...middlewares], controllers.write.ohqueue.getPosition);
 
 	setupApiRoute(router, 'put', '/entry/:id/assign', [...middlewares], controllers.write.ohqueue.assign);
-	setupApiRoute(router, 'put', '/entry/:id/start', [...middlewares], controllers.write.ohqueue.startSession);
 	setupApiRoute(router, 'put', '/entry/:id/resolve', [...middlewares], controllers.write.ohqueue.resolve);
-	setupApiRoute(router, 'put', '/entry/:id/requeue', [...middlewares], controllers.write.ohqueue.requeue);
 
-	setupApiRoute(router, 'post', '/:cid/take-next', [...middlewares], controllers.write.ohqueue.takeNext);
 	setupApiRoute(router, 'put', '/:cid/open', [...middlewares], controllers.write.ohqueue.setQueueOpen);
 
 	return router;
