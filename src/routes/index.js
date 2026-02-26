@@ -47,6 +47,7 @@ _mounts.main = (app, middleware, controllers) => {
 	setupPageRoute(app, '/folders/bookmarks', [middleware.ensureLoggedIn], controllers.folders.bookmarks.get);
 	setupPageRoute(app, '/folders/:folderId', [middleware.ensureLoggedIn], controllers.folders.folder.get);
 
+	setupPageRoute(app, '/ohqueue/:cid', [middleware.ensureLoggedIn], controllers.ohqueue.get);
 
 	app.post('/compose', middleware.applyCSRF, controllers.composer.post);
 };
