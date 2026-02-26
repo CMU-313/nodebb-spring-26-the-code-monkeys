@@ -53,7 +53,7 @@ module.exports = function (Posts) {
 			post.user = uidToUser[post.uid];
 			Posts.overrideGuestHandle(post, post.handle);
 			post.handle = undefined;
-			if (post.anonymous) {
+			if (post.anonymous === true) {
 				post.user = {
 					uid: 0,
 					username: 'Anonymous',
