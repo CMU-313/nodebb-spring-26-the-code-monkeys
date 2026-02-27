@@ -1259,6 +1259,60 @@ describe('Post\'s', () => {
 			});
 		});
 	});
+
+	describe('anonymous posting', () => {
+		let anonTopic;
+		let anonReply;
+		let anonUid;
+
+		before(async () => {
+			anonUid = await user.create({ username: 'anonuser' });
+			const result = await topics.post({
+				uid: anonUid,
+				cid: cid,
+				title: 'Anonymous Topic',
+				content: 'This is anonymous',
+				anonymous: true,
+			});
+			anonTopic = result;
+			anonReply = await topics.reply({
+				uid: anonUid,
+				tid: result.topicData.tid,
+				content: 'Anonymous reply',
+				anonymous: true,
+			});
+		});
+
+		it('should store anonymous flag in post data', async () => {
+			const postData = await posts.getPostData(anonTopic.postData.pid);
+			assert.strictEqual(postData.anonymous, 1);
+		});
+
+		it('should hide user identity in topic view for anonymous posts', async () => {
+			const topicObj = await topics.getTopicData(anonTopic.topicData.tid);
+			const data = await topics.getTopicWithPosts(topicObj, `tid:${topicObj.tid}:posts`, 0, 0, -1, false);
+			const mainPost = data.posts[0];
+			assert.strictEqual(mainPost.user.username, 'Anonymous');
+			assert.strictEqual(mainPost.user.uid, 0);
+		});
+
+		it('should hide user identity in post summary for anonymous posts', async () => {
+			const summaries = await posts.getPostSummaryByPids([anonReply.pid], 0, { stripTags: true });
+			assert.strictEqual(summaries[0].user.username, 'Anonymous');
+			assert.strictEqual(summaries[0].user.uid, 0);
+		});
+
+		it('should not hide user identity for non-anonymous posts', async () => {
+			const normalResult = await topics.reply({
+				uid: anonUid,
+				tid: anonTopic.topicData.tid,
+				content: 'Normal reply',
+			});
+			const summaries = await posts.getPostSummaryByPids([normalResult.pid], 0, { stripTags: true });
+			assert.strictEqual(summaries[0].user.username, 'anonuser');
+			assert.strictEqual(summaries[0].user.uid, anonUid);
+		});
+	});
 });
 
 describe('Posts\'', async () => {

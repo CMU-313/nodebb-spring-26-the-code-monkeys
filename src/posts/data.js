@@ -7,7 +7,7 @@ const utils = require('../utils');
 const intFields = [
 	'uid', 'pid', 'tid', 'deleted', 'timestamp',
 	'upvotes', 'downvotes', 'deleterUid', 'edited',
-	'replies', 'bookmarks', 'announces',
+	'replies', 'bookmarks', 'announces', 'anonymous',
 ];
 
 module.exports = function (Posts) {
@@ -58,10 +58,6 @@ module.exports = function (Posts) {
 function modifyPost(post, fields) {
 	if (post) {
 		db.parseIntFields(post, intFields, fields);
-		// Parse anonymous field as boolean
-		if (post.hasOwnProperty('anonymous')) {
-			post.anonymous = post.anonymous === 'true' || post.anonymous === true || post.anonymous === 1;
-		}
 		if (post.hasOwnProperty('upvotes') && post.hasOwnProperty('downvotes')) {
 			post.votes = post.upvotes - post.downvotes;
 		}
