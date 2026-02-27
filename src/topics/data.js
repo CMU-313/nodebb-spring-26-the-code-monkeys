@@ -97,6 +97,10 @@ function modifyTopic(topic, fields) {
 	}
 
 	db.parseIntFields(topic, intFields, fields);
+	// Parse anonymous field as boolean
+	if (topic.hasOwnProperty('anonymous')) {
+		topic.anonymous = topic.anonymous === 'true' || topic.anonymous === true || topic.anonymous === 1;
+	}
 
 	if (topic.hasOwnProperty('title')) {
 		topic.titleRaw = topic.title;

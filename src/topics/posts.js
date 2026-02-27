@@ -150,7 +150,7 @@ module.exports = function (Topics) {
 					postObj.user.displayname = postObj.user.username;
 				}
 				// Anonymous posting: Hide user identity for anonymous posts
-				if (postObj.anonymous === true) {
+				if (postObj.anonymous) {
 					postObj.user = {
 						uid: 0,
 						username: 'Anonymous',

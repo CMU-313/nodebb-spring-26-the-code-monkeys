@@ -418,19 +418,75 @@ $(document).ready(function () {
 		}
 	});
 
-	// FIX: Use filter hook instead of trying to modify frozen object
-	$(window).on('filter:composer.submit', function (ev, data) {
-		console.log('[Anonymous] Filter submit event fired!');
-		const composer = $('[data-uuid="' + data.post_uuid + '"]');
-		const checkbox = composer.find('[data-anonymous-checkbox]:checked');
+	// Anonymous posting feature
+	require(['hooks'], function (hooks) {
+		console.log('[Anonymous] Registering hooks with require');
 		
-		// Set the anonymous flag
-		if (checkbox.length > 0) {
+		// Store checkbox states by UUID
+		const anonymousStates = {};
+		
+		// Add checkbox when composer loads
+		hooks.on('action:composer.loaded', function (data) {
+			console.log('[Anonymous] Composer loaded event fired!', data);
+			const composer = $('[data-uuid="' + data.post_uuid + '"]');
+			
+			if (!composer.length) {
+				console.log('[Anonymous] Composer not found for uuid:', data.post_uuid);
+				return;
+			}
+			
+			console.log('[Anonymous] Found composer:', composer.length);
+			
+			const checkboxId = 'anonymous-checkbox-' + data.post_uuid;
+			const checkboxHtml = `
+				<div class="form-check anonymous-posting-container" style="display: inline-flex; align-items: center; margin: 0 10px;">
+					<input class="form-check-input" type="checkbox" id="${checkboxId}" style="margin: 0 5px 0 0;">
+					<label class="form-check-label" for="${checkboxId}" style="margin: 0; cursor: pointer;">
+						Post Anonymously
+					</label>
+				</div>
+			`;
+			
+			// Add to BOTH mobile and desktop composers
+			const mobileSubmit = composer.find('.mobile-navbar .composer-submit');
+			if (mobileSubmit.length) {
+				mobileSubmit.before(checkboxHtml);
+				console.log('[Anonymous] Added to mobile composer');
+			}
+			
+			const desktopSubmit = composer.find('.write-preview-container .composer-submit').not('.mobile-navbar .composer-submit');
+			if (desktopSubmit.length) {
+				desktopSubmit.before(checkboxHtml);
+				console.log('[Anonymous] Added to desktop composer');
+			}
+			
+			// Listen for checkbox changes
+			$('#' + checkboxId).on('change', function () {
+				anonymousStates[data.post_uuid] = $(this).is(':checked');
+				console.log('[Anonymous] Checkbox changed for', data.post_uuid, ':', anonymousStates[data.post_uuid]);
+			});
+		});
+		
+		// Capture anonymous flag on submit
+		// Capture anonymous flag on submit  
+		hooks.on('filter:composer.submit', function (data) {
+			console.log('[Anonymous] Filter submit event fired!', data);
+			
+			// Find the active composer (the one that's visible)
+			const activeComposer = $('.composer.active, .composer:visible').first();
+			console.log('[Anonymous] Active composer:', activeComposer.length);
+			
+			// Find checkbox in the active composer
+			const checkbox = activeComposer.find('input[id^="anonymous-checkbox-"]');
+			console.log('[Anonymous] Checkbox found:', checkbox.length);
+			console.log('[Anonymous] Checkbox ID:', checkbox.attr('id'));
+			console.log('[Anonymous] Checkbox is checked:', checkbox.is(':checked'));
+			
 			data.body = data.body || {};
-			data.anonymous = true;
-			console.log('[Anonymous] Set anonymous to true');
-		}
-		
-		return data;
+			data.body.anonymous = checkbox.is(':checked');
+			console.log('[Anonymous] Set anonymous to:', data.body.anonymous);
+			
+			return data;
+		});
 	});
 });
