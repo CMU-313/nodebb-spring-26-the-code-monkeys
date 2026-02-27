@@ -247,7 +247,7 @@ module.exports = function (Topics) {
 		return postData;
 	};
 
-	async function onNewPost({ pid, tid, uid: postOwner }, { uid, handle }) {
+	async function onNewPost({ pid, tid, uid: postOwner, anonymous }, { uid, handle }) {
 		const [[postData], [userInfo]] = await Promise.all([
 			posts.getPostSummaryByPids([pid], uid, { extraFields: ['attachments'] }),
 			posts.getUserInfoForPosts([postOwner], uid),
@@ -259,7 +259,24 @@ module.exports = function (Topics) {
 		]);
 
 		// Returned data is a superset of post summary data
-		postData.user = userInfo;
+		if (anonymous) {
+			postData.user = {
+				uid: 0,
+				username: 'Anonymous',
+				userslug: '',
+				displayname: 'Anonymous',
+				fullname: '',
+				picture: '',
+				'icon:text': 'A',
+				'icon:bgColor': '#aaa',
+				signature: '',
+				groupTitle: '',
+				selectedGroups: [],
+				custom_profile_info: [],
+			};
+		} else {
+			postData.user = userInfo;
+		}
 		postData.index = postData.topic.postcount - 1;
 		postData.bookmarked = false;
 		postData.display_edit_tools = true;

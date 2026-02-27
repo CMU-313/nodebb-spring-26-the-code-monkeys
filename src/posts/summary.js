@@ -53,15 +53,18 @@ module.exports = function (Posts) {
 			post.user = uidToUser[post.uid];
 			Posts.overrideGuestHandle(post, post.handle);
 			post.handle = undefined;
+
+			// Anonymous posting: hide user identity in summaries
 			if (post.anonymous) {
 				post.user = {
 					uid: 0,
 					username: 'Anonymous',
 					userslug: '',
-					picture: null,
+					picture: '',
 					status: 'offline',
 				};
 			}
+
 			post.topic = tidToTopic[post.tid];
 			post.category = post.topic && cidToCategory[post.topic.cid];
 			post.isMainPost = post.topic && post.pid === post.topic.mainPid;

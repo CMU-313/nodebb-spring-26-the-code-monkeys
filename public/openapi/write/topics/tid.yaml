@@ -48,6 +48,9 @@ post:
               example: This is a test reply
             toPid:
               type: number
+            anonymous:
+              type: boolean
+              description: Whether to post this reply anonymously
           required:
             - content
   responses:

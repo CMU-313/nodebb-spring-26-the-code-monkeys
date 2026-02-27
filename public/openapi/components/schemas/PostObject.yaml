@@ -35,9 +35,8 @@ PostObject:
     votes:
       type: number
     anonymous:
-      type: boolean
-      description: Whether this post was created anonymously
-      nullable: true
+      type: number
+      description: Whether this post was made anonymously (1 for anonymous, 0 otherwise)
     timestampISO:
       type: string
       description: An ISO 8601 formatted date string (complementing `timestamp`)

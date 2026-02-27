@@ -379,17 +379,11 @@ if (document.readyState === 'loading') {
 }());
 
 // Anonymous posting feature
-console.log('[Anonymous] Script loaded in app.js');
-
 $(document).ready(function () {
 	$(window).on('action:composer.loaded', function (ev, data) {
-		console.log('[Anonymous] Composer loaded event fired!', data);
-		
 		const composer = $('[data-uuid="' + data.post_uuid + '"]');
-		console.log('[Anonymous] Found composer:', composer.length);
-		
+
 		if (composer.find('.anonymous-posting-container').length) {
-			console.log('[Anonymous] Checkbox already exists');
 			return;
 		}
 
@@ -403,90 +397,29 @@ $(document).ready(function () {
 		`;
 		
 		// Add to BOTH mobile and desktop composers
-		// Mobile: in the navbar
 		const mobileSubmit = composer.find('.mobile-navbar .composer-submit');
 		if (mobileSubmit.length) {
 			mobileSubmit.before(checkboxHtml);
-			console.log('[Anonymous] Added to mobile composer');
 		}
-		
+
 		// Desktop: find the main composer submit area
 		const desktopSubmit = composer.find('.composer-submit').not('.mobile-navbar .composer-submit');
 		if (desktopSubmit.length) {
 			desktopSubmit.before(checkboxHtml.replace(data.post_uuid, data.post_uuid + '-desktop'));
-			console.log('[Anonymous] Added to desktop composer');
 		}
 	});
 
-	// Anonymous posting feature
-	require(['hooks'], function (hooks) {
-		console.log('[Anonymous] Registering hooks with require');
-		
-		// Store checkbox states by UUID
-		const anonymousStates = {};
-		
-		// Add checkbox when composer loads
-		hooks.on('action:composer.loaded', function (data) {
-			console.log('[Anonymous] Composer loaded event fired!', data);
-			const composer = $('[data-uuid="' + data.post_uuid + '"]');
-			
-			if (!composer.length) {
-				console.log('[Anonymous] Composer not found for uuid:', data.post_uuid);
-				return;
-			}
-			
-			console.log('[Anonymous] Found composer:', composer.length);
-			
-			const checkboxId = 'anonymous-checkbox-' + data.post_uuid;
-			const checkboxHtml = `
-				<div class="form-check anonymous-posting-container" style="display: inline-flex; align-items: center; margin: 0 10px;">
-					<input class="form-check-input" type="checkbox" id="${checkboxId}" style="margin: 0 5px 0 0;">
-					<label class="form-check-label" for="${checkboxId}" style="margin: 0; cursor: pointer;">
-						Post Anonymously
-					</label>
-				</div>
-			`;
-			
-			// Add to BOTH mobile and desktop composers
-			const mobileSubmit = composer.find('.mobile-navbar .composer-submit');
-			if (mobileSubmit.length) {
-				mobileSubmit.before(checkboxHtml);
-				console.log('[Anonymous] Added to mobile composer');
-			}
-			
-			const desktopSubmit = composer.find('.write-preview-container .composer-submit').not('.mobile-navbar .composer-submit');
-			if (desktopSubmit.length) {
-				desktopSubmit.before(checkboxHtml);
-				console.log('[Anonymous] Added to desktop composer');
-			}
-			
-			// Listen for checkbox changes
-			$('#' + checkboxId).on('change', function () {
-				anonymousStates[data.post_uuid] = $(this).is(':checked');
-				console.log('[Anonymous] Checkbox changed for', data.post_uuid, ':', anonymousStates[data.post_uuid]);
-			});
-		});
-		
-		// Capture anonymous flag on submit
-		// Capture anonymous flag on submit  
-		hooks.on('filter:composer.submit', function (data) {
-			console.log('[Anonymous] Filter submit event fired!', data);
-			
-			// Find the active composer (the one that's visible)
-			const activeComposer = $('.composer.active, .composer:visible').first();
-			console.log('[Anonymous] Active composer:', activeComposer.length);
-			
-			// Find checkbox in the active composer
-			const checkbox = activeComposer.find('input[id^="anonymous-checkbox-"]');
-			console.log('[Anonymous] Checkbox found:', checkbox.length);
-			console.log('[Anonymous] Checkbox ID:', checkbox.attr('id'));
-			console.log('[Anonymous] Checkbox is checked:', checkbox.is(':checked'));
-			
-			data.body = data.body || {};
-			data.body.anonymous = checkbox.is(':checked');
-			console.log('[Anonymous] Set anonymous to:', data.body.anonymous);
-			
-			return data;
-		});
+	// Use filter hook to add anonymous flag to composerData before API call
+	$(window).on('filter:composer.submit', function (ev, data) {
+		const composer = $('[data-uuid="' + data.composerData.uuid + '"]');
+		const checkbox = composer.find('[data-anonymous-checkbox]:checked');
+
+		if (checkbox.length > 0) {
+			data.composerData.anonymous = true;
+		} else {
+			data.composerData.anonymous = false;
+		}
+
+		return data;
 	});
 });
