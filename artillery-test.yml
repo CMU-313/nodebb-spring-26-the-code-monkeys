@@ -1,0 +1,14 @@
+config:
+  target: "http://17313-team14.s3d.cmu.edu:4567"
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      name: "Warm up"
+    - duration: 30
+      arrivalRate: 20
+      name: "Sustained Load"
+scenarios:
+  - name: "Visit Homepage"
+    flow:
+      - get:
+          url: "/"
