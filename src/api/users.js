@@ -5,7 +5,7 @@ const fs = require('fs').promises;
 
 const validator = require('validator');
 const winston = require('winston');
-
+const postTranslator = require('../llm/postTranslator');
 const db = require('../database');
 const user = require('../user');
 const groups = require('../groups');
@@ -27,6 +27,29 @@ const hasAdminPrivilege = async (uid, privilege) => {
 	if (!ok) {
 		throw new Error('[[error:no-privileges]]');
 	}
+};
+usersAPI.getTranslatorLanguage = async function (caller) {
+	const preferredLanguage = caller.uid
+		? await user.getUserField(caller.uid, 'translatorPreferredLanguage')
+		: 'en';
+
+	return {
+		language: postTranslator.sanitizeLanguage(preferredLanguage),
+	};
+};
+
+usersAPI.setTranslatorLanguage = async function (caller, data) {
+	if (!caller.uid) {
+		throw new Error('[[error:no-privileges]]');
+	}
+
+	const language = postTranslator.sanitizeLanguage(data.language);
+
+	await user.setUserField(caller.uid, 'translatorPreferredLanguage', language);
+
+	return {
+		language,
+	};
 };
 
 usersAPI.create = async function (caller, data) {
