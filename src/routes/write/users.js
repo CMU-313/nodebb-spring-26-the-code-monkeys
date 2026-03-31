@@ -14,7 +14,8 @@ function guestRoutes() {
 
 function authenticatedRoutes() {
 	const middlewares = [middleware.ensureLoggedIn];
-
+	setupApiRoute(router, 'get', '/translator/language', [], controllers.write.users.getTranslatorLanguage);
+    setupApiRoute(router, 'post', '/translator/language', [...middlewares, middleware.checkRequired.bind(null, ['language'])], controllers.write.users.setTranslatorLanguage);
 	setupApiRoute(router, 'post', '/', [...middlewares, middleware.checkRequired.bind(null, ['username'])], controllers.write.users.create);
 	setupApiRoute(router, 'delete', '/', [...middlewares, middleware.checkRequired.bind(null, ['uids'])], controllers.write.users.deleteMany);
 
