@@ -45,10 +45,13 @@ postsAPI.get = async function (caller, data) {
 	return post;
 };
 postsAPI.translate = async function (caller, data) {
+	console.log('api.posts.translate input', data);
+
 	const pid = parseInt(data.pid, 10);
 
 	if (!Number.isInteger(pid) || pid <= 0) {
-		throw new Error('[[error:invalid-data]]');
+		console.log('api.posts.translate invalid pid', data.pid);
+		return { ok: false, error: 'invalid-pid' };
 	}
 
 	let targetLanguage = data.language;
@@ -57,14 +60,15 @@ postsAPI.translate = async function (caller, data) {
 		targetLanguage = await user.getUserField(caller.uid, 'translatorPreferredLanguage');
 	}
 
+	console.log('api.posts.translate before helper', { pid, targetLanguage });
+
 	const result = await postTranslator.translatePost(pid, targetLanguage || 'en');
 
-	if (!result.ok) {
-		throw new Error('[[error:invalid-data]]');
-	}
+	console.log('api.posts.translate result', result);
 
 	return result;
 };
+
 postsAPI.getIndex = async (caller, { pid, sort }) => {
 	const tid = await posts.getPostField(pid, 'tid');
 	const topicPrivileges = await privileges.topics.get(tid, caller.uid);

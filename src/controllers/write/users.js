@@ -57,6 +57,16 @@ Users.deleteAccount = async (req, res) => {
 	helpers.formatApiResponse(200, res);
 };
 
+Users.getTranslatorLanguage = async function (req, res) {
+	const result = await api.users.getTranslatorLanguage(req);
+	res.json(result);
+};
+
+Users.setTranslatorLanguage = async function (req, res) {
+	const result = await api.users.setTranslatorLanguage(req, req.body);
+	res.json(result);
+};
+
 Users.deleteMany = async (req, res) => {
 	await api.users.deleteMany(req, req.body);
 	helpers.formatApiResponse(200, res);
