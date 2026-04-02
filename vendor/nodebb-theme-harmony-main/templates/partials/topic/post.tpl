@@ -82,8 +82,15 @@
 		</div>
 
 		<div class="content text-break" component="post/content" itemprop="text">
-			{posts.content}
+    {posts.content}
 		</div>
+		<div class="d-flex align-items-center gap-2 mt-1 translate-controls" data-pid="{posts.pid}">
+				<a class="btn btn-ghost btn-sm translate-btn" href="#" title="Translate post">
+						<i class="fa fa-language text-primary"></i> Translate
+				</a>
+				<span class="translate-status text-muted small" style="display:none;"></span>
+		</div>
+		<div class="translated-content mt-2 p-2 border rounded" style="display:none;"></div>
 
 		<div component="post/footer" class="post-footer border-bottom pb-2">
 			{{{ if posts.user.signature }}}
