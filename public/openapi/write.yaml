@@ -220,6 +220,8 @@ paths:
     $ref: "write/posts/pid/owner.yaml"
   /posts/owner:
     $ref: "write/posts/owner.yaml"
+  /posts/translate:
+    $ref: "write/posts/translate.yaml"
   /chats/:
     $ref: "write/chats.yaml"
   /chats/unread:
