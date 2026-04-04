@@ -1,0 +1,45 @@
+get:
+  tags:
+    - users
+  summary: get language configuration for the nodebb-plugin-translator
+  description: Returns the user language settings for translator
+  responses:
+    "200":
+      description: Returns translator language config
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                $ref: ../../../components/schemas/Status.yaml#/Status
+              response:
+                type: object
+post:
+  tags:
+    - users
+  summary: save language configuration for the nodebb-plugin-translator
+  description: Saves the user language settings for translator
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            language:
+              type: string
+              description: The language to translate to
+              example: en
+  responses:
+    "200":
+      description: Returns success status
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                $ref: ../../../components/schemas/Status.yaml#/Status
+              response:
+                type: object
