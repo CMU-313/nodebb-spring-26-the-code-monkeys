@@ -1,0 +1,44 @@
+post:
+  tags:
+    - posts
+  summary: Translate a post
+  description: Translates a post into another language.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            pid:
+              type: integer
+              description: A valid post id
+              example: 2
+            language:
+              type: string
+              description: The target language to translate to
+              example: en
+          required:
+            - pid
+  responses:
+    '200':
+      description: Post successfully translated
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                $ref: ../../components/schemas/Status.yaml#/Status
+              response:
+                type: object
+                properties: {}
+    '400':
+      description: Translation failed or bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                $ref: ../../components/schemas/Status.yaml#/Status

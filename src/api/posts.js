@@ -2,7 +2,7 @@
 
 const validator = require('validator');
 const _ = require('lodash');
-
+const postTranslator = require('../llm/postTranslator');
 const db = require('../database');
 const utils = require('../utils');
 const user = require('../user');
@@ -43,6 +43,30 @@ postsAPI.get = async function (caller, data) {
 	}
 
 	return post;
+};
+postsAPI.translate = async function (caller, data) {
+	console.log('api.posts.translate input', data);
+
+	const pid = parseInt(data.pid, 10);
+
+	if (!Number.isInteger(pid) || pid <= 0) {
+		console.log('api.posts.translate invalid pid', data.pid);
+		return { ok: false, error: 'invalid-pid' };
+	}
+
+	let targetLanguage = data.language;
+
+	if (!targetLanguage && caller.uid) {
+		targetLanguage = await user.getUserField(caller.uid, 'translatorPreferredLanguage');
+	}
+
+	console.log('api.posts.translate before helper', { pid, targetLanguage });
+
+	const result = await postTranslator.translatePost(pid, targetLanguage || 'en');
+
+	console.log('api.posts.translate result', result);
+
+	return result;
 };
 
 postsAPI.getIndex = async (caller, { pid, sort }) => {

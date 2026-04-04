@@ -70,6 +70,7 @@ define('forum/topic', [
 		handleBookmark(tid);
 		handleThumbs();
 		addCrosspostsHandler();
+		configureTranslateButton();
 
 		$(window).on('scroll', utils.debounce(updateTopicTitle, 250));
 
@@ -507,6 +508,48 @@ define('forum/topic', [
 		}
 	}
 
+	function configureTranslateButton() {
+		$('.topic').on('click', '.translate-btn', async function (e) {
+			e.preventDefault();
+			const controls = $(this).closest('.translate-controls');
+			const pid = controls.data('pid');
+			const translatedDiv = controls.next('.translated-content');
+			const statusEl = controls.find('.translate-status');
+
+			// If already translated, just toggle
+			if (translatedDiv.text().trim()) {
+				translatedDiv.toggle();
+				const isVisible = translatedDiv.is(':visible');
+				$(this).html(isVisible ?
+					'<i class="fa fa-language text-primary"></i> Hide translation' :
+					'<i class="fa fa-language text-primary"></i> Translate'
+				);
+				return;
+			}
+
+			// Show loading state
+			$(this).html('<i class="fa fa-spinner fa-spin text-primary"></i> Translating...');
+
+			try {
+				const result = await api.post('/posts/translate', { pid: pid });
+				if (result && result.ok) {
+					if (result.translated) {
+						translatedDiv.html(result.translation).show();
+						$(this).html('<i class="fa fa-language text-primary"></i> Hide translation');
+					} else {
+						statusEl.text('Post is already in your preferred language.').show();
+						$(this).html('<i class="fa fa-language text-primary"></i> Translate');
+					}
+				} else {
+					statusEl.text('Translation failed. Please try again.').show();
+					$(this).html('<i class="fa fa-language text-primary"></i> Translate');
+				}
+			} catch (err) {
+				statusEl.text('Translation unavailable.').show();
+				$(this).html('<i class="fa fa-language text-primary"></i> Translate');
+			}
+		});
+	}
 
 	return Topic;
 });

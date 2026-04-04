@@ -89,6 +89,11 @@ Posts.purge = async (req, res) => {
 	helpers.formatApiResponse(200, res);
 };
 
+Posts.translate = async function (req, res) {
+	const result = await api.posts.translate(req, req.body);
+	return res.status(result.ok ? 200 : 400).json(result);
+};
+
 Posts.restore = async (req, res) => {
 	await api.posts.restore(req, { pid: req.params.pid });
 	helpers.formatApiResponse(200, res);
