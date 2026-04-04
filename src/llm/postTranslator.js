@@ -102,18 +102,20 @@ async function queryOllama(text, targetLanguage) {
 		}
 
 		const data = await response.json();
-		const content = data && data.message && typeof data.message.content === 'string'
-			? data.message.content.trim()
-			: '';
+		const content = data && data.message && typeof data.message.content === 'string' ?
+			data.message.content.trim() :
+			'';
 		const parsed = tryParseJson(content);
 
 		if (!parsed) {
 			return { ok: false };
 		}
 
-		let isTargetLanguage = parsed.is_target_language;
-		let detectedLanguage = parsed.detected_language;
-		let translation = parsed.translation;
+		let {
+			is_target_language: isTargetLanguage,
+			detected_language: detectedLanguage,
+			translation,
+		} = parsed;
 
 		if (typeof isTargetLanguage !== 'boolean') {
 			isTargetLanguage = String(isTargetLanguage).toLowerCase() === 'true';

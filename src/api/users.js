@@ -29,9 +29,9 @@ const hasAdminPrivilege = async (uid, privilege) => {
 	}
 };
 usersAPI.getTranslatorLanguage = async function (caller) {
-	const preferredLanguage = caller.uid
-		? await user.getUserField(caller.uid, 'translatorPreferredLanguage')
-		: 'en';
+	const preferredLanguage = caller.uid ?
+		await user.getUserField(caller.uid, 'translatorPreferredLanguage') :
+		'en';
 
 	return {
 		language: postTranslator.sanitizeLanguage(preferredLanguage),
