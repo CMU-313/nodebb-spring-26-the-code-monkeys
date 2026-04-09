@@ -1,0 +1,22 @@
+[
+    {
+      "component": "jquery",
+      "justification": "Upstream NodeBB dependency; update is outside project scope"
+    },
+    {
+      "component": "lodash",
+      "justification": "Transitive dependency via gaze; cannot update directly"
+    },
+    {
+      "component": "underscore",
+      "justification": "Upstream NodeBB dependency; not invoked in production code paths"
+    },
+    {
+      "component": "markdown-it",
+      "justification": "Core NodeBB dependency; version pinned by upstream"
+    },
+    {
+      "component": "svelte",
+      "justification": "Development/build dependency; not present in production deployment"
+    }
+  ]

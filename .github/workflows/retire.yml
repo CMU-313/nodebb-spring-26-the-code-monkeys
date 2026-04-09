@@ -1,0 +1,26 @@
+name: Retire.js Security Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  retire-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Retire.js
+        run: npm install -g retire
+
+      - name: Run Retire.js scan
+        run: retire --severity medium --ignorefile .retireignore.json --outputformat text --exitwith 0
