@@ -1,0 +1,534 @@
+retire.js v5.4.2
+Loading from cache: https://raw.githubusercontent.com/RetireJS/retire.js/master/repository/jsrepository-v5.json
+/workspaces/nodebb-spring-26-the-code-monkeys/node_modules/lodash/lodash.js
+ ↳ lodash 4.17.21
+lodash 4.17.21 has known vulnerabilities: severity: medium; summary: ### Impact
+
+Lodash versions 4.0.0 through 4.17.22 are vulnerable to prototype pollution in the `_.unset` and `_.omit` functions. An attacker can pass crafted paths which cause Lodash to delete methods from global prototypes. 
+
+The issue permits deletion of properties but does not allow overwriting their original behavior.  
+
+### Patches
+
+This issue is patched on 4.17.23., githubID: GHSA-xxjr-mmjv-4gpg, CVE: CVE-2025-13465; https://github.com/lodash/lodash/security/advisories/GHSA-xxjr-mmjv-4gpg https://github.com/lodash/lodash/commit/edadd452146f7e4bad4ea684e955708931d84d81
+/workspaces/nodebb-spring-26-the-code-monkeys/node_modules/lodash/lodash.min.js
+ ↳ lodash 4.17.21
+lodash 4.17.21 has known vulnerabilities: severity: medium; summary: ### Impact
+
+Lodash versions 4.0.0 through 4.17.22 are vulnerable to prototype pollution in the `_.unset` and `_.omit` functions. An attacker can pass crafted paths which cause Lodash to delete methods from global prototypes. 
+
+The issue permits deletion of properties but does not allow overwriting their original behavior.  
+
+### Patches
+
+This issue is patched on 4.17.23., githubID: GHSA-xxjr-mmjv-4gpg, CVE: CVE-2025-13465; https://github.com/lodash/lodash/security/advisories/GHSA-xxjr-mmjv-4gpg https://github.com/lodash/lodash/commit/edadd452146f7e4bad4ea684e955708931d84d81
+/workspaces/nodebb-spring-26-the-code-monkeys/node_modules/underscore/underscore-esm-min.js
+ ↳ underscore.js 1.13.7
+underscore.js 1.13.7 has known vulnerabilities: severity: high; summary: ### Impact
+
+In simple words, some programs that use `_.flatten` or `_.isEqual` could be made to crash. Someone who wants to do harm may be able to do this on purpose. This can only be done if the program has special properties. It only works in Underscore versions up to 1.13.7. A more detailed explanation follows.
+
+In affected versions of Underscore, the `_.flatten` and `_.isEqual` functions use recursion without a depth limit. Under very specific conditions, detailed below, an attacker could exploit this in a Denial of Service (DoS) attack by triggering a stack overflow.
+
+A proof of concept (PoC) for this type of attack with `_.isEqual`:
+
+```js
+const _ = require('underscore');
+
+// build JSON string for nested object ~4500 levels deep
+// (for this to be an attack, the JSON would have to come from
+// a request or other untrusted input)
+let json = '';
+for (let i = 0; i < 4500; i++) json += '{"n":';
+json += '"x"';
+for (let i = 0; i < 4500; i++) json += '}';
+
+// construct two distinct objects with equal shape from the above JSON
+const a = JSON.parse(json);
+const b = JSON.parse(json);
+
+_.isEqual(a, b); // RangeError: Maximum call stack size exceeded
+```
+
+A proof of concept (PoC) for this type of attack with `_.flatten`:
+
+```js
+const _ = require('underscore');
+
+// build nested array ~4500 levels deep
+// (like with _.isEqual, this nested array would have to be sourced
+// from an untrusted external source for it to be an attack)
+let nested = [];
+for (let i = 0; i < 4500; i++) nested = [nested];
+
+_.flatten(nested); // RangeError: Maximum call stack size exceeded
+```
+
+An application that crashes because of this can be restarted, so the bug is most relevant to applications for which continued operation is important, such as server applications. Furthermore, an application is only vulnerable to this type of attack if ALL of the following conditions are met:
+
+- Untrusted input must be used to create a recursive datastructure, for example using `JSON.parse`, with no enforced depth limit.
+- The datastructure thus created must be passed to `_.flatten` or `_.isEqual`.
+- In the case of `_.flatten`, the vulnerability can only be exploited if it is possible for a remote client to prepare a datastructure that consists of arrays at all levels AND if no finite depth limit is passed as the second argument to `_.flatten`.
+- In the case of `_.isEqual`, the vulnerability can only be exploited if there exists a code path in which two distinct datastructures that were submitted by the same remote client are compared using `_.isEqual`. For example, if a client submits data that are stored in a database, and the same client can later submit another datastructure that is then compared to the data that were saved in the database previously, OR if a client submits a single request, but its data are parsed twice, creating two non-identical but equivalent datastructures that are then compared.
+- Exceptions originating from the call to `_.flatten` or `_.isEqual`, as a result of a stack overflow, are not being caught.
+
+All versions of Underscore up to and including 1.13.7 are affected by this weakness.
+
+### Patches
+
+The problem has been patched in version 1.13.8. Upgrading to 1.13.8 or later completely prevents exploitation.
+
+**Note:** historically, there have been breaking changes in minor releases of Underscore, especially between versions 1.6 and 1.9. However, upgrading from version 1.9 or later to any later 1.x version should be feasible with little or no effort for all users.
+
+### Workarounds
+
+A workaround that works for both functions is to enforce a depth limit on the datastructure that is created from untrusted input. A limit of 1000 levels should prevent attacks from being successful on most systems. In systems with highly constrained hardware, we recommend lower limits, for example 100 levels.
+
+Another possible workaround that only works for `_.flatten`, is to pass a second argument that limits the flattening depth to 1000 or less.
+
+### References
+
+- https://github.com/jashkenas/underscore/issues/3011
+- https://underscorejs.org/#1.13.8
+- https://underscorejs.org/#flatten
+- https://underscorejs.org/#isEqual, githubID: GHSA-qpx9-hpmf-5gmw, CVE: CVE-2026-27601; https://github.com/jashkenas/underscore/security/advisories/GHSA-qpx9-hpmf-5gmw https://github.com/jashkenas/underscore/issues/3011 https://github.com/jashkenas/underscore/commit/411e222eb0ca5d570cc4f6315c02c05b830ed2b4 https://github.com/jashkenas/underscore/commit/a6e23ae9647461ec33ad9f92a2ecfc220eea0a84 https://underscorejs.org/#1.13.8 https://underscorejs.org/#flatten https://underscorejs.org/#isEqual
+/workspaces/nodebb-spring-26-the-code-monkeys/node_modules/underscore/underscore-esm.js
+ ↳ underscore.js 1.13.7
+underscore.js 1.13.7 has known vulnerabilities: severity: high; summary: ### Impact
+
+In simple words, some programs that use `_.flatten` or `_.isEqual` could be made to crash. Someone who wants to do harm may be able to do this on purpose. This can only be done if the program has special properties. It only works in Underscore versions up to 1.13.7. A more detailed explanation follows.
+
+In affected versions of Underscore, the `_.flatten` and `_.isEqual` functions use recursion without a depth limit. Under very specific conditions, detailed below, an attacker could exploit this in a Denial of Service (DoS) attack by triggering a stack overflow.
+
+A proof of concept (PoC) for this type of attack with `_.isEqual`:
+
+```js
+const _ = require('underscore');
+
+// build JSON string for nested object ~4500 levels deep
+// (for this to be an attack, the JSON would have to come from
+// a request or other untrusted input)
+let json = '';
+for (let i = 0; i < 4500; i++) json += '{"n":';
+json += '"x"';
+for (let i = 0; i < 4500; i++) json += '}';
+
+// construct two distinct objects with equal shape from the above JSON
+const a = JSON.parse(json);
+const b = JSON.parse(json);
+
+_.isEqual(a, b); // RangeError: Maximum call stack size exceeded
+```
+
+A proof of concept (PoC) for this type of attack with `_.flatten`:
+
+```js
+const _ = require('underscore');
+
+// build nested array ~4500 levels deep
+// (like with _.isEqual, this nested array would have to be sourced
+// from an untrusted external source for it to be an attack)
+let nested = [];
+for (let i = 0; i < 4500; i++) nested = [nested];
+
+_.flatten(nested); // RangeError: Maximum call stack size exceeded
+```
+
+An application that crashes because of this can be restarted, so the bug is most relevant to applications for which continued operation is important, such as server applications. Furthermore, an application is only vulnerable to this type of attack if ALL of the following conditions are met:
+
+- Untrusted input must be used to create a recursive datastructure, for example using `JSON.parse`, with no enforced depth limit.
+- The datastructure thus created must be passed to `_.flatten` or `_.isEqual`.
+- In the case of `_.flatten`, the vulnerability can only be exploited if it is possible for a remote client to prepare a datastructure that consists of arrays at all levels AND if no finite depth limit is passed as the second argument to `_.flatten`.
+- In the case of `_.isEqual`, the vulnerability can only be exploited if there exists a code path in which two distinct datastructures that were submitted by the same remote client are compared using `_.isEqual`. For example, if a client submits data that are stored in a database, and the same client can later submit another datastructure that is then compared to the data that were saved in the database previously, OR if a client submits a single request, but its data are parsed twice, creating two non-identical but equivalent datastructures that are then compared.
+- Exceptions originating from the call to `_.flatten` or `_.isEqual`, as a result of a stack overflow, are not being caught.
+
+All versions of Underscore up to and including 1.13.7 are affected by this weakness.
+
+### Patches
+
+The problem has been patched in version 1.13.8. Upgrading to 1.13.8 or later completely prevents exploitation.
+
+**Note:** historically, there have been breaking changes in minor releases of Underscore, especially between versions 1.6 and 1.9. However, upgrading from version 1.9 or later to any later 1.x version should be feasible with little or no effort for all users.
+
+### Workarounds
+
+A workaround that works for both functions is to enforce a depth limit on the datastructure that is created from untrusted input. A limit of 1000 levels should prevent attacks from being successful on most systems. In systems with highly constrained hardware, we recommend lower limits, for example 100 levels.
+
+Another possible workaround that only works for `_.flatten`, is to pass a second argument that limits the flattening depth to 1000 or less.
+
+### References
+
+- https://github.com/jashkenas/underscore/issues/3011
+- https://underscorejs.org/#1.13.8
+- https://underscorejs.org/#flatten
+- https://underscorejs.org/#isEqual, githubID: GHSA-qpx9-hpmf-5gmw, CVE: CVE-2026-27601; https://github.com/jashkenas/underscore/security/advisories/GHSA-qpx9-hpmf-5gmw https://github.com/jashkenas/underscore/issues/3011 https://github.com/jashkenas/underscore/commit/411e222eb0ca5d570cc4f6315c02c05b830ed2b4 https://github.com/jashkenas/underscore/commit/a6e23ae9647461ec33ad9f92a2ecfc220eea0a84 https://underscorejs.org/#1.13.8 https://underscorejs.org/#flatten https://underscorejs.org/#isEqual
+/workspaces/nodebb-spring-26-the-code-monkeys/node_modules/underscore/underscore-min.js
+ ↳ underscore.js 1.13.7
+underscore.js 1.13.7 has known vulnerabilities: severity: high; summary: ### Impact
+
+In simple words, some programs that use `_.flatten` or `_.isEqual` could be made to crash. Someone who wants to do harm may be able to do this on purpose. This can only be done if the program has special properties. It only works in Underscore versions up to 1.13.7. A more detailed explanation follows.
+
+In affected versions of Underscore, the `_.flatten` and `_.isEqual` functions use recursion without a depth limit. Under very specific conditions, detailed below, an attacker could exploit this in a Denial of Service (DoS) attack by triggering a stack overflow.
+
+A proof of concept (PoC) for this type of attack with `_.isEqual`:
+
+```js
+const _ = require('underscore');
+
+// build JSON string for nested object ~4500 levels deep
+// (for this to be an attack, the JSON would have to come from
+// a request or other untrusted input)
+let json = '';
+for (let i = 0; i < 4500; i++) json += '{"n":';
+json += '"x"';
+for (let i = 0; i < 4500; i++) json += '}';
+
+// construct two distinct objects with equal shape from the above JSON
+const a = JSON.parse(json);
+const b = JSON.parse(json);
+
+_.isEqual(a, b); // RangeError: Maximum call stack size exceeded
+```
+
+A proof of concept (PoC) for this type of attack with `_.flatten`:
+
+```js
+const _ = require('underscore');
+
+// build nested array ~4500 levels deep
+// (like with _.isEqual, this nested array would have to be sourced
+// from an untrusted external source for it to be an attack)
+let nested = [];
+for (let i = 0; i < 4500; i++) nested = [nested];
+
+_.flatten(nested); // RangeError: Maximum call stack size exceeded
+```
+
+An application that crashes because of this can be restarted, so the bug is most relevant to applications for which continued operation is important, such as server applications. Furthermore, an application is only vulnerable to this type of attack if ALL of the following conditions are met:
+
+- Untrusted input must be used to create a recursive datastructure, for example using `JSON.parse`, with no enforced depth limit.
+- The datastructure thus created must be passed to `_.flatten` or `_.isEqual`.
+- In the case of `_.flatten`, the vulnerability can only be exploited if it is possible for a remote client to prepare a datastructure that consists of arrays at all levels AND if no finite depth limit is passed as the second argument to `_.flatten`.
+- In the case of `_.isEqual`, the vulnerability can only be exploited if there exists a code path in which two distinct datastructures that were submitted by the same remote client are compared using `_.isEqual`. For example, if a client submits data that are stored in a database, and the same client can later submit another datastructure that is then compared to the data that were saved in the database previously, OR if a client submits a single request, but its data are parsed twice, creating two non-identical but equivalent datastructures that are then compared.
+- Exceptions originating from the call to `_.flatten` or `_.isEqual`, as a result of a stack overflow, are not being caught.
+
+All versions of Underscore up to and including 1.13.7 are affected by this weakness.
+
+### Patches
+
+The problem has been patched in version 1.13.8. Upgrading to 1.13.8 or later completely prevents exploitation.
+
+**Note:** historically, there have been breaking changes in minor releases of Underscore, especially between versions 1.6 and 1.9. However, upgrading from version 1.9 or later to any later 1.x version should be feasible with little or no effort for all users.
+
+### Workarounds
+
+A workaround that works for both functions is to enforce a depth limit on the datastructure that is created from untrusted input. A limit of 1000 levels should prevent attacks from being successful on most systems. In systems with highly constrained hardware, we recommend lower limits, for example 100 levels.
+
+Another possible workaround that only works for `_.flatten`, is to pass a second argument that limits the flattening depth to 1000 or less.
+
+### References
+
+- https://github.com/jashkenas/underscore/issues/3011
+- https://underscorejs.org/#1.13.8
+- https://underscorejs.org/#flatten
+- https://underscorejs.org/#isEqual, githubID: GHSA-qpx9-hpmf-5gmw, CVE: CVE-2026-27601; https://github.com/jashkenas/underscore/security/advisories/GHSA-qpx9-hpmf-5gmw https://github.com/jashkenas/underscore/issues/3011 https://github.com/jashkenas/underscore/commit/411e222eb0ca5d570cc4f6315c02c05b830ed2b4 https://github.com/jashkenas/underscore/commit/a6e23ae9647461ec33ad9f92a2ecfc220eea0a84 https://underscorejs.org/#1.13.8 https://underscorejs.org/#flatten https://underscorejs.org/#isEqual
+/workspaces/nodebb-spring-26-the-code-monkeys/node_modules/underscore/underscore-umd-min.js
+ ↳ underscore.js 1.13.7
+underscore.js 1.13.7 has known vulnerabilities: severity: high; summary: ### Impact
+
+In simple words, some programs that use `_.flatten` or `_.isEqual` could be made to crash. Someone who wants to do harm may be able to do this on purpose. This can only be done if the program has special properties. It only works in Underscore versions up to 1.13.7. A more detailed explanation follows.
+
+In affected versions of Underscore, the `_.flatten` and `_.isEqual` functions use recursion without a depth limit. Under very specific conditions, detailed below, an attacker could exploit this in a Denial of Service (DoS) attack by triggering a stack overflow.
+
+A proof of concept (PoC) for this type of attack with `_.isEqual`:
+
+```js
+const _ = require('underscore');
+
+// build JSON string for nested object ~4500 levels deep
+// (for this to be an attack, the JSON would have to come from
+// a request or other untrusted input)
+let json = '';
+for (let i = 0; i < 4500; i++) json += '{"n":';
+json += '"x"';
+for (let i = 0; i < 4500; i++) json += '}';
+
+// construct two distinct objects with equal shape from the above JSON
+const a = JSON.parse(json);
+const b = JSON.parse(json);
+
+_.isEqual(a, b); // RangeError: Maximum call stack size exceeded
+```
+
+A proof of concept (PoC) for this type of attack with `_.flatten`:
+
+```js
+const _ = require('underscore');
+
+// build nested array ~4500 levels deep
+// (like with _.isEqual, this nested array would have to be sourced
+// from an untrusted external source for it to be an attack)
+let nested = [];
+for (let i = 0; i < 4500; i++) nested = [nested];
+
+_.flatten(nested); // RangeError: Maximum call stack size exceeded
+```
+
+An application that crashes because of this can be restarted, so the bug is most relevant to applications for which continued operation is important, such as server applications. Furthermore, an application is only vulnerable to this type of attack if ALL of the following conditions are met:
+
+- Untrusted input must be used to create a recursive datastructure, for example using `JSON.parse`, with no enforced depth limit.
+- The datastructure thus created must be passed to `_.flatten` or `_.isEqual`.
+- In the case of `_.flatten`, the vulnerability can only be exploited if it is possible for a remote client to prepare a datastructure that consists of arrays at all levels AND if no finite depth limit is passed as the second argument to `_.flatten`.
+- In the case of `_.isEqual`, the vulnerability can only be exploited if there exists a code path in which two distinct datastructures that were submitted by the same remote client are compared using `_.isEqual`. For example, if a client submits data that are stored in a database, and the same client can later submit another datastructure that is then compared to the data that were saved in the database previously, OR if a client submits a single request, but its data are parsed twice, creating two non-identical but equivalent datastructures that are then compared.
+- Exceptions originating from the call to `_.flatten` or `_.isEqual`, as a result of a stack overflow, are not being caught.
+
+All versions of Underscore up to and including 1.13.7 are affected by this weakness.
+
+### Patches
+
+The problem has been patched in version 1.13.8. Upgrading to 1.13.8 or later completely prevents exploitation.
+
+**Note:** historically, there have been breaking changes in minor releases of Underscore, especially between versions 1.6 and 1.9. However, upgrading from version 1.9 or later to any later 1.x version should be feasible with little or no effort for all users.
+
+### Workarounds
+
+A workaround that works for both functions is to enforce a depth limit on the datastructure that is created from untrusted input. A limit of 1000 levels should prevent attacks from being successful on most systems. In systems with highly constrained hardware, we recommend lower limits, for example 100 levels.
+
+Another possible workaround that only works for `_.flatten`, is to pass a second argument that limits the flattening depth to 1000 or less.
+
+### References
+
+- https://github.com/jashkenas/underscore/issues/3011
+- https://underscorejs.org/#1.13.8
+- https://underscorejs.org/#flatten
+- https://underscorejs.org/#isEqual, githubID: GHSA-qpx9-hpmf-5gmw, CVE: CVE-2026-27601; https://github.com/jashkenas/underscore/security/advisories/GHSA-qpx9-hpmf-5gmw https://github.com/jashkenas/underscore/issues/3011 https://github.com/jashkenas/underscore/commit/411e222eb0ca5d570cc4f6315c02c05b830ed2b4 https://github.com/jashkenas/underscore/commit/a6e23ae9647461ec33ad9f92a2ecfc220eea0a84 https://underscorejs.org/#1.13.8 https://underscorejs.org/#flatten https://underscorejs.org/#isEqual
+/workspaces/nodebb-spring-26-the-code-monkeys/node_modules/underscore/underscore-umd.js
+ ↳ underscore.js 1.13.7
+underscore.js 1.13.7 has known vulnerabilities: severity: high; summary: ### Impact
+
+In simple words, some programs that use `_.flatten` or `_.isEqual` could be made to crash. Someone who wants to do harm may be able to do this on purpose. This can only be done if the program has special properties. It only works in Underscore versions up to 1.13.7. A more detailed explanation follows.
+
+In affected versions of Underscore, the `_.flatten` and `_.isEqual` functions use recursion without a depth limit. Under very specific conditions, detailed below, an attacker could exploit this in a Denial of Service (DoS) attack by triggering a stack overflow.
+
+A proof of concept (PoC) for this type of attack with `_.isEqual`:
+
+```js
+const _ = require('underscore');
+
+// build JSON string for nested object ~4500 levels deep
+// (for this to be an attack, the JSON would have to come from
+// a request or other untrusted input)
+let json = '';
+for (let i = 0; i < 4500; i++) json += '{"n":';
+json += '"x"';
+for (let i = 0; i < 4500; i++) json += '}';
+
+// construct two distinct objects with equal shape from the above JSON
+const a = JSON.parse(json);
+const b = JSON.parse(json);
+
+_.isEqual(a, b); // RangeError: Maximum call stack size exceeded
+```
+
+A proof of concept (PoC) for this type of attack with `_.flatten`:
+
+```js
+const _ = require('underscore');
+
+// build nested array ~4500 levels deep
+// (like with _.isEqual, this nested array would have to be sourced
+// from an untrusted external source for it to be an attack)
+let nested = [];
+for (let i = 0; i < 4500; i++) nested = [nested];
+
+_.flatten(nested); // RangeError: Maximum call stack size exceeded
+```
+
+An application that crashes because of this can be restarted, so the bug is most relevant to applications for which continued operation is important, such as server applications. Furthermore, an application is only vulnerable to this type of attack if ALL of the following conditions are met:
+
+- Untrusted input must be used to create a recursive datastructure, for example using `JSON.parse`, with no enforced depth limit.
+- The datastructure thus created must be passed to `_.flatten` or `_.isEqual`.
+- In the case of `_.flatten`, the vulnerability can only be exploited if it is possible for a remote client to prepare a datastructure that consists of arrays at all levels AND if no finite depth limit is passed as the second argument to `_.flatten`.
+- In the case of `_.isEqual`, the vulnerability can only be exploited if there exists a code path in which two distinct datastructures that were submitted by the same remote client are compared using `_.isEqual`. For example, if a client submits data that are stored in a database, and the same client can later submit another datastructure that is then compared to the data that were saved in the database previously, OR if a client submits a single request, but its data are parsed twice, creating two non-identical but equivalent datastructures that are then compared.
+- Exceptions originating from the call to `_.flatten` or `_.isEqual`, as a result of a stack overflow, are not being caught.
+
+All versions of Underscore up to and including 1.13.7 are affected by this weakness.
+
+### Patches
+
+The problem has been patched in version 1.13.8. Upgrading to 1.13.8 or later completely prevents exploitation.
+
+**Note:** historically, there have been breaking changes in minor releases of Underscore, especially between versions 1.6 and 1.9. However, upgrading from version 1.9 or later to any later 1.x version should be feasible with little or no effort for all users.
+
+### Workarounds
+
+A workaround that works for both functions is to enforce a depth limit on the datastructure that is created from untrusted input. A limit of 1000 levels should prevent attacks from being successful on most systems. In systems with highly constrained hardware, we recommend lower limits, for example 100 levels.
+
+Another possible workaround that only works for `_.flatten`, is to pass a second argument that limits the flattening depth to 1000 or less.
+
+### References
+
+- https://github.com/jashkenas/underscore/issues/3011
+- https://underscorejs.org/#1.13.8
+- https://underscorejs.org/#flatten
+- https://underscorejs.org/#isEqual, githubID: GHSA-qpx9-hpmf-5gmw, CVE: CVE-2026-27601; https://github.com/jashkenas/underscore/security/advisories/GHSA-qpx9-hpmf-5gmw https://github.com/jashkenas/underscore/issues/3011 https://github.com/jashkenas/underscore/commit/411e222eb0ca5d570cc4f6315c02c05b830ed2b4 https://github.com/jashkenas/underscore/commit/a6e23ae9647461ec33ad9f92a2ecfc220eea0a84 https://underscorejs.org/#1.13.8 https://underscorejs.org/#flatten https://underscorejs.org/#isEqual
+/workspaces/nodebb-spring-26-the-code-monkeys/node_modules/underscore/underscore.js
+ ↳ underscore.js 1.13.7
+underscore.js 1.13.7 has known vulnerabilities: severity: high; summary: ### Impact
+
+In simple words, some programs that use `_.flatten` or `_.isEqual` could be made to crash. Someone who wants to do harm may be able to do this on purpose. This can only be done if the program has special properties. It only works in Underscore versions up to 1.13.7. A more detailed explanation follows.
+
+In affected versions of Underscore, the `_.flatten` and `_.isEqual` functions use recursion without a depth limit. Under very specific conditions, detailed below, an attacker could exploit this in a Denial of Service (DoS) attack by triggering a stack overflow.
+
+A proof of concept (PoC) for this type of attack with `_.isEqual`:
+
+```js
+const _ = require('underscore');
+
+// build JSON string for nested object ~4500 levels deep
+// (for this to be an attack, the JSON would have to come from
+// a request or other untrusted input)
+let json = '';
+for (let i = 0; i < 4500; i++) json += '{"n":';
+json += '"x"';
+for (let i = 0; i < 4500; i++) json += '}';
+
+// construct two distinct objects with equal shape from the above JSON
+const a = JSON.parse(json);
+const b = JSON.parse(json);
+
+_.isEqual(a, b); // RangeError: Maximum call stack size exceeded
+```
+
+A proof of concept (PoC) for this type of attack with `_.flatten`:
+
+```js
+const _ = require('underscore');
+
+// build nested array ~4500 levels deep
+// (like with _.isEqual, this nested array would have to be sourced
+// from an untrusted external source for it to be an attack)
+let nested = [];
+for (let i = 0; i < 4500; i++) nested = [nested];
+
+_.flatten(nested); // RangeError: Maximum call stack size exceeded
+```
+
+An application that crashes because of this can be restarted, so the bug is most relevant to applications for which continued operation is important, such as server applications. Furthermore, an application is only vulnerable to this type of attack if ALL of the following conditions are met:
+
+- Untrusted input must be used to create a recursive datastructure, for example using `JSON.parse`, with no enforced depth limit.
+- The datastructure thus created must be passed to `_.flatten` or `_.isEqual`.
+- In the case of `_.flatten`, the vulnerability can only be exploited if it is possible for a remote client to prepare a datastructure that consists of arrays at all levels AND if no finite depth limit is passed as the second argument to `_.flatten`.
+- In the case of `_.isEqual`, the vulnerability can only be exploited if there exists a code path in which two distinct datastructures that were submitted by the same remote client are compared using `_.isEqual`. For example, if a client submits data that are stored in a database, and the same client can later submit another datastructure that is then compared to the data that were saved in the database previously, OR if a client submits a single request, but its data are parsed twice, creating two non-identical but equivalent datastructures that are then compared.
+- Exceptions originating from the call to `_.flatten` or `_.isEqual`, as a result of a stack overflow, are not being caught.
+
+All versions of Underscore up to and including 1.13.7 are affected by this weakness.
+
+### Patches
+
+The problem has been patched in version 1.13.8. Upgrading to 1.13.8 or later completely prevents exploitation.
+
+**Note:** historically, there have been breaking changes in minor releases of Underscore, especially between versions 1.6 and 1.9. However, upgrading from version 1.9 or later to any later 1.x version should be feasible with little or no effort for all users.
+
+### Workarounds
+
+A workaround that works for both functions is to enforce a depth limit on the datastructure that is created from untrusted input. A limit of 1000 levels should prevent attacks from being successful on most systems. In systems with highly constrained hardware, we recommend lower limits, for example 100 levels.
+
+Another possible workaround that only works for `_.flatten`, is to pass a second argument that limits the flattening depth to 1000 or less.
+
+### References
+
+- https://github.com/jashkenas/underscore/issues/3011
+- https://underscorejs.org/#1.13.8
+- https://underscorejs.org/#flatten
+- https://underscorejs.org/#isEqual, githubID: GHSA-qpx9-hpmf-5gmw, CVE: CVE-2026-27601; https://github.com/jashkenas/underscore/security/advisories/GHSA-qpx9-hpmf-5gmw https://github.com/jashkenas/underscore/issues/3011 https://github.com/jashkenas/underscore/commit/411e222eb0ca5d570cc4f6315c02c05b830ed2b4 https://github.com/jashkenas/underscore/commit/a6e23ae9647461ec33ad9f92a2ecfc220eea0a84 https://underscorejs.org/#1.13.8 https://underscorejs.org/#flatten https://underscorejs.org/#isEqual
+/workspaces/nodebb-spring-26-the-code-monkeys/node_modules/gaze/lib/helper.js
+ ↳ lodash 1.0.1
+lodash 1.0.1 has known vulnerabilities: severity: medium; summary: Prototype Pollution in lodash, CVE: CVE-2018-3721, githubID: GHSA-fvqr-27wr-82fm; https://github.com/advisories/GHSA-fvqr-27wr-82fm https://nvd.nist.gov/vuln/detail/CVE-2018-3721 https://github.com/lodash/lodash/commit/d8e069cc3410082e44eb18fcf8e7f3d08ebe1d4a https://hackerone.com/reports/310443 https://github.com/advisories/GHSA-fvqr-27wr-82fm https://security.netapp.com/advisory/ntap-20190919-0004/ https://www.npmjs.com/advisories/577 severity: high; summary: Prototype Pollution in lodash, CVE: CVE-2018-16487, githubID: GHSA-4xc9-xhrj-v574; https://github.com/advisories/GHSA-4xc9-xhrj-v574 https://nvd.nist.gov/vuln/detail/CVE-2018-16487 https://github.com/lodash/lodash/commit/90e6199a161b6445b01454517b40ef65ebecd2ad https://hackerone.com/reports/380873 https://github.com/advisories/GHSA-4xc9-xhrj-v574 https://security.netapp.com/advisory/ntap-20190919-0004/ https://www.npmjs.com/advisories/782 severity: high; summary: Prototype Pollution in lodash, CVE: CVE-2019-10744, githubID: GHSA-jf85-cpcp-j695; https://github.com/advisories/GHSA-jf85-cpcp-j695 https://nvd.nist.gov/vuln/detail/CVE-2019-10744 https://github.com/lodash/lodash/pull/4336 https://access.redhat.com/errata/RHSA-2019:3024 https://security.netapp.com/advisory/ntap-20191004-0005/ https://snyk.io/vuln/SNYK-JS-LODASH-450202 https://support.f5.com/csp/article/K47105354?utm_source=f5support&amp;utm_medium=RSS https://www.npmjs.com/advisories/1065 https://www.oracle.com/security-alerts/cpujan2021.html https://www.oracle.com/security-alerts/cpuoct2020.html severity: high; summary: Command Injection in lodash, CVE: CVE-2021-23337, githubID: GHSA-35jh-r3h4-6jhm; https://github.com/advisories/GHSA-35jh-r3h4-6jhm https://nvd.nist.gov/vuln/detail/CVE-2021-23337 https://github.com/lodash/lodash/commit/3469357cff396a26c363f8c1b5a91dde28ba4b1c https://cert-portal.siemens.com/productcert/pdf/ssa-637483.pdf https://github.com/lodash/lodash https://github.com/lodash/lodash/blob/ddfd9b11a0126db2302cb70ec9973b66baec0975/lodash.js#L14851 https://github.com/lodash/lodash/blob/ddfd9b11a0126db2302cb70ec9973b66baec0975/lodash.js%23L14851 https://security.netapp.com/advisory/ntap-20210312-0006/ https://snyk.io/vuln/SNYK-JAVA-ORGFUJIONWEBJARS-1074932 https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARS-1074930 https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSBOWER-1074928 https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSBOWERGITHUBLODASH-1074931 https://snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-1074929 https://snyk.io/vuln/SNYK-JS-LODASH-1040724 https://www.oracle.com//security-alerts/cpujul2021.html https://www.oracle.com/security-alerts/cpujan2022.html https://www.oracle.com/security-alerts/cpujul2022.html https://www.oracle.com/security-alerts/cpuoct2021.html
+/workspaces/nodebb-spring-26-the-code-monkeys/node_modules/markdown-it/dist/markdown-it.js
+ ↳ markdown-it 14.1.0
+markdown-it 14.1.0 has known vulnerabilities: severity: medium; summary: Versions of the package markdown-it from 13.0.0 and before 14.1.1 are vulnerable to Regular Expression Denial of Service (ReDoS) due to the use of the regex /\*+$/ in the linkify function. An attacker can supply a long sequence of * characters followed by a non-matching character, which triggers excessive backtracking and may lead to a denial-of-service condition., githubID: GHSA-38c4-r59v-3vqw, CVE: CVE-2026-2327; https://github.com/markdown-it/markdown-it/commit/4b4bbcae5e0990a5b172378e507b33a59012ed26 https://gist.github.com/ltduc147/c9abecae1b291ede4f692f2ab988c917 https://github.com/markdown-it/markdown-it/blob/14.1.0/lib/rules_inline/linkify.mjs#L33 https://security.snyk.io/vuln/SNYK-JS-MARKDOWNIT-10666750
+/workspaces/nodebb-spring-26-the-code-monkeys/node_modules/markdown-it/dist/markdown-it.min.js
+ ↳ markdown-it 14.1.0
+markdown-it 14.1.0 has known vulnerabilities: severity: medium; summary: Versions of the package markdown-it from 13.0.0 and before 14.1.1 are vulnerable to Regular Expression Denial of Service (ReDoS) due to the use of the regex /\*+$/ in the linkify function. An attacker can supply a long sequence of * characters followed by a non-matching character, which triggers excessive backtracking and may lead to a denial-of-service condition., githubID: GHSA-38c4-r59v-3vqw, CVE: CVE-2026-2327; https://github.com/markdown-it/markdown-it/commit/4b4bbcae5e0990a5b172378e507b33a59012ed26 https://gist.github.com/ltduc147/c9abecae1b291ede4f692f2ab988c917 https://github.com/markdown-it/markdown-it/blob/14.1.0/lib/rules_inline/linkify.mjs#L33 https://security.snyk.io/vuln/SNYK-JS-MARKDOWNIT-10666750
+/workspaces/nodebb-spring-26-the-code-monkeys/node_modules/underscore/modules/index.js
+ ↳ underscore.js 1.13.7
+underscore.js 1.13.7 has known vulnerabilities: severity: high; summary: ### Impact
+
+In simple words, some programs that use `_.flatten` or `_.isEqual` could be made to crash. Someone who wants to do harm may be able to do this on purpose. This can only be done if the program has special properties. It only works in Underscore versions up to 1.13.7. A more detailed explanation follows.
+
+In affected versions of Underscore, the `_.flatten` and `_.isEqual` functions use recursion without a depth limit. Under very specific conditions, detailed below, an attacker could exploit this in a Denial of Service (DoS) attack by triggering a stack overflow.
+
+A proof of concept (PoC) for this type of attack with `_.isEqual`:
+
+```js
+const _ = require('underscore');
+
+// build JSON string for nested object ~4500 levels deep
+// (for this to be an attack, the JSON would have to come from
+// a request or other untrusted input)
+let json = '';
+for (let i = 0; i < 4500; i++) json += '{"n":';
+json += '"x"';
+for (let i = 0; i < 4500; i++) json += '}';
+
+// construct two distinct objects with equal shape from the above JSON
+const a = JSON.parse(json);
+const b = JSON.parse(json);
+
+_.isEqual(a, b); // RangeError: Maximum call stack size exceeded
+```
+
+A proof of concept (PoC) for this type of attack with `_.flatten`:
+
+```js
+const _ = require('underscore');
+
+// build nested array ~4500 levels deep
+// (like with _.isEqual, this nested array would have to be sourced
+// from an untrusted external source for it to be an attack)
+let nested = [];
+for (let i = 0; i < 4500; i++) nested = [nested];
+
+_.flatten(nested); // RangeError: Maximum call stack size exceeded
+```
+
+An application that crashes because of this can be restarted, so the bug is most relevant to applications for which continued operation is important, such as server applications. Furthermore, an application is only vulnerable to this type of attack if ALL of the following conditions are met:
+
+- Untrusted input must be used to create a recursive datastructure, for example using `JSON.parse`, with no enforced depth limit.
+- The datastructure thus created must be passed to `_.flatten` or `_.isEqual`.
+- In the case of `_.flatten`, the vulnerability can only be exploited if it is possible for a remote client to prepare a datastructure that consists of arrays at all levels AND if no finite depth limit is passed as the second argument to `_.flatten`.
+- In the case of `_.isEqual`, the vulnerability can only be exploited if there exists a code path in which two distinct datastructures that were submitted by the same remote client are compared using `_.isEqual`. For example, if a client submits data that are stored in a database, and the same client can later submit another datastructure that is then compared to the data that were saved in the database previously, OR if a client submits a single request, but its data are parsed twice, creating two non-identical but equivalent datastructures that are then compared.
+- Exceptions originating from the call to `_.flatten` or `_.isEqual`, as a result of a stack overflow, are not being caught.
+
+All versions of Underscore up to and including 1.13.7 are affected by this weakness.
+
+### Patches
+
+The problem has been patched in version 1.13.8. Upgrading to 1.13.8 or later completely prevents exploitation.
+
+**Note:** historically, there have been breaking changes in minor releases of Underscore, especially between versions 1.6 and 1.9. However, upgrading from version 1.9 or later to any later 1.x version should be feasible with little or no effort for all users.
+
+### Workarounds
+
+A workaround that works for both functions is to enforce a depth limit on the datastructure that is created from untrusted input. A limit of 1000 levels should prevent attacks from being successful on most systems. In systems with highly constrained hardware, we recommend lower limits, for example 100 levels.
+
+Another possible workaround that only works for `_.flatten`, is to pass a second argument that limits the flattening depth to 1000 or less.
+
+### References
+
+- https://github.com/jashkenas/underscore/issues/3011
+- https://underscorejs.org/#1.13.8
+- https://underscorejs.org/#flatten
+- https://underscorejs.org/#isEqual, githubID: GHSA-qpx9-hpmf-5gmw, CVE: CVE-2026-27601; https://github.com/jashkenas/underscore/security/advisories/GHSA-qpx9-hpmf-5gmw https://github.com/jashkenas/underscore/issues/3011 https://github.com/jashkenas/underscore/commit/411e222eb0ca5d570cc4f6315c02c05b830ed2b4 https://github.com/jashkenas/underscore/commit/a6e23ae9647461ec33ad9f92a2ecfc220eea0a84 https://underscorejs.org/#1.13.8 https://underscorejs.org/#flatten https://underscorejs.org/#isEqual
+/workspaces/nodebb-spring-26-the-code-monkeys/node_modules/mousetrap/tests/libs/jquery-1.7.2.min.js
+ ↳ jquery 1.7.2
+jquery 1.7.2 has known vulnerabilities: severity: medium; summary: Selector interpreted as HTML, CVE: CVE-2012-6708, bug: 11290, githubID: GHSA-2pqj-h3vj-pqgw; http://bugs.jquery.com/ticket/11290 http://research.insecurelabs.org/jquery/test/ https://nvd.nist.gov/vuln/detail/CVE-2012-6708 severity: medium; summary: Versions of jquery prior to 1.9.0 are vulnerable to Cross-Site Scripting. The load method fails to recognize and remove "<script>" HTML tags that contain a whitespace character, i.e: "</script >", which results in the enclosed script logic to be executed. This allows attackers to execute arbitrary JavaScript in a victim's browser.
+
+
+## Recommendation
+
+Upgrade to version 1.9.0 or later., CVE: CVE-2020-7656, githubID: GHSA-q4m3-2j7h-f7xw; https://github.com/advisories/GHSA-q4m3-2j7h-f7xw https://nvd.nist.gov/vuln/detail/CVE-2020-7656 https://research.insecurelabs.org/jquery/test/ severity: medium; summary: 3rd party CORS request may execute, issue: 2432, CVE: CVE-2015-9251, githubID: GHSA-rmxg-73gg-4p98; http://blog.jquery.com/2016/01/08/jquery-2-2-and-1-12-released/ http://research.insecurelabs.org/jquery/test/ https://github.com/advisories/GHSA-rmxg-73gg-4p98 https://github.com/jquery/jquery/issues/2432 https://nvd.nist.gov/vuln/detail/CVE-2015-9251 severity: low; summary: jQuery 1.x and 2.x are End-of-Life and no longer receiving security updates, retid: 73, issue: 162; https://github.com/jquery/jquery.com/issues/162 severity: medium; summary: jQuery before 3.4.0, as used in Drupal, Backdrop CMS, and other products, mishandles jQuery.extend(true, {}, ...) because of Object.prototype pollution, CVE: CVE-2019-11358, PR: 4333, githubID: GHSA-6c3j-c64m-qhgq; https://blog.jquery.com/2019/04/10/jquery-3-4-0-released/ https://github.com/jquery/jquery/commit/753d591aea698e57d6db58c9f722cd0808619b1b https://nvd.nist.gov/vuln/detail/CVE-2019-11358 severity: medium; summary: passing HTML containing <option> elements from untrusted sources - even after sanitizing it - to one of jQuery's DOM manipulation methods (i.e. .html(), .append(), and others) may execute untrusted code., CVE: CVE-2020-11023, issue: 4647, githubID: GHSA-jpcq-cgw6-v4j6; https://blog.jquery.com/2020/04/10/jquery-3-5-0-released/ severity: medium; summary: Regex in its jQuery.htmlPrefilter sometimes may introduce XSS, CVE: CVE-2020-11022, issue: 4642, githubID: GHSA-gxr4-xjj5-5px2; https://blog.jquery.com/2020/04/10/jquery-3-5-0-released/
+/workspaces/nodebb-spring-26-the-code-monkeys/node_modules/nodebb-plugin-emoji/build/acp/admin.js
+ ↳ svelte 4.2.20
+svelte 4.2.20 has known vulnerabilities: severity: medium; summary: In server-side rendering, attribute spreading on elements (e.g. `<div {...attrs}>`) enumerates inherited properties from the object's prototype chain rather than only own properties. In environments where `Object.prototype` has already been polluted — a precondition outside of Svelte's control — this can cause unexpected attributes to appear in SSR output or cause SSR to throw errors. Client-side rendering is not affected., githubID: GHSA-crpf-4hrx-3jrp, CVE: CVE-2026-27125; https://github.com/sveltejs/svelte/security/advisories/GHSA-crpf-4hrx-3jrp https://github.com/sveltejs/svelte/commit/73098bb26c6f06e7fd1b0746d817d2c5ee90755f https://github.com/sveltejs/svelte/releases/tag/svelte@5.51.5 severity: medium; summary: Versions of svelte prior to 5.51.5 are vulnerable to cross-site scripting (XSS) during server-side rendering. When using spread syntax to render attributes from untrusted data, event handler properties are included in the rendered HTML output. If an application spreads user-controlled or external data as element attributes, an attacker can inject malicious event handlers that execute in victims' browsers., githubID: GHSA-f7gr-6p89-r883, CVE: CVE-2026-27121; https://github.com/sveltejs/svelte/security/advisories/GHSA-f7gr-6p89-r883 severity: medium; summary: When using `<svelte:element this={tag}>` in server-side rendering, the provided tag name is not validated or sanitized before being emitted into the HTML output. If the tag string contains unexpected characters, it can result in HTML injection in the SSR output. Client-side rendering is not affected., githubID: GHSA-m56q-vw4c-c2cp, CVE: CVE-2026-27122; https://github.com/sveltejs/svelte/security/advisories/GHSA-m56q-vw4c-c2cp severity: medium; summary: The contents of `bind:innerText` and `bind:textContent` on `contenteditable` elements were not properly escaped. This could enable HTML injection and Cross-site Scripting (XSS) if rendering untrusted data as the binding's initial value on the server., githubID: GHSA-phwv-c562-gvmh, CVE: CVE-2026-27901; https://github.com/sveltejs/svelte/security/advisories/GHSA-phwv-c562-gvmh https://github.com/sveltejs/svelte/commit/0df5abcae223058ceb95491470372065fb87951d https://github.com/sveltejs/svelte/releases/tag/svelte@5.53.5
